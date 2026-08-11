@@ -8,7 +8,7 @@ Files that are synced out to Azure Verified Modules (AVM) module repositories.
 | --- | --- |
 | `terraform/files/<fileGroup>/` | File overlays. `root` applies to every module repository; the others stack on top for repositories mapped to that group. |
 | `terraform/config/managed-files.json` | Declares the file groups and, per group, the paths that must not exist in the target repository. |
-| `terraform/scripts/` | Validation scripts for the managed file content. |
+| `scripts/` | Validation scripts, shared across all languages. |
 
 Which repositories receive which file group is defined by `repositoryGroups` in
 [`azure-verified-modules-tools`](https://github.com/Azure/azure-verified-modules-tools).

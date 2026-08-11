@@ -8,7 +8,7 @@ on:
     paths:
       - "**/.vscode/extensions.json"
       - "**/.devcontainer/devcontainer.json"
-      - "terraform/scripts/Test-VsCodeExtensions.ps1"
+      - "scripts/Test-VsCodeExtensions.ps1"
       - ".github/workflows/validate-vscode-extensions.yml"
   workflow_dispatch:
 
@@ -22,4 +22,4 @@ jobs:
 
       - name: Validate extensions
         shell: pwsh
-        run: ./terraform/scripts/Test-VsCodeExtensions.ps1
+        run: ./scripts/Test-VsCodeExtensions.ps1
