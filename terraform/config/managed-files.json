@@ -50,9 +50,6 @@
     },
     {
       "name": "canary"
-    },
-    {
-      "name": "canary-tooling"
     }
   ]
 }
