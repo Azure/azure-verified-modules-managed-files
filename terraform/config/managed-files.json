@@ -49,7 +49,10 @@
       ]
     },
     {
-      "name": "canary"
+      "name": "canary-ring-0"
+    },
+    {
+      "name": "canary-ring-1"
     }
   ]
 }
