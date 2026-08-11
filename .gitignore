@@ -1,0 +1,5 @@
+# Deliberately minimal. Broad patterns risk silently excluding a managed file
+# from the sync, so add only what is provably not managed content.
+.DS_Store
+Thumbs.db
+*.swp

@@ -1,0 +1,26 @@
+version: 2
+
+updates:
+  # Dependabot does not recurse for github-actions, and globs are only
+  # supported by `directories`, so every workflow directory is listed.
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /terraform/files/*/.github/workflows
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: ci
+      include: scope
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch

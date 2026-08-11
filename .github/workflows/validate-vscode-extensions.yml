@@ -1,0 +1,25 @@
+---
+name: Validate VS Code Extensions
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/.vscode/extensions.json"
+      - "**/.devcontainer/devcontainer.json"
+      - "terraform/scripts/Test-VsCodeExtensions.ps1"
+      - ".github/workflows/validate-vscode-extensions.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: "[AVM] Validate VS Code Extension IDs"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate extensions
+        shell: pwsh
+        run: ./terraform/scripts/Test-VsCodeExtensions.ps1
