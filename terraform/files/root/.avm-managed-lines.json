@@ -1,0 +1,10 @@
+{
+  ".gitignore": {
+    "removed": [
+      ".avm"
+    ],
+    "required": [
+      ".avm/managed-files.json"
+    ]
+  }
+}
