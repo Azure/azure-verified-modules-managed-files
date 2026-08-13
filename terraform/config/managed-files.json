@@ -39,7 +39,44 @@
         "avm.config.json",
         "locals.telemetry.tf",
         "locals.version.tf.json"
-      ]
+      ],
+      "managedLines": {
+        ".gitignore": {
+          "required": [
+            "**/.terraform/*",
+            "*.tfstate",
+            "*.tfstate.*",
+            "crash.log",
+            "crash.*.log",
+            "*.tfvars",
+            "*.tfvars.json",
+            "override.tf",
+            "override.tf.json",
+            "*_override.tf",
+            "*_override.tf.json",
+            ".terraform.lock.hcl",
+            ".terraformrc",
+            "terraform.rc",
+            "avmmakefile",
+            "README-generated.md",
+            "avm.tflint.hcl",
+            "avm.tflint_example.hcl",
+            "avm.tflint_module.hcl",
+            "avm.tflint.merged.hcl",
+            "avm.tflint_example.merged.hcl",
+            "avm.tflint_module.merged.hcl",
+            "*tfplan*",
+            "*.md.tmp",
+            ".DS_Store",
+            "examples/*/policy",
+            "*.mptfbackup",
+            ".avm/managed-files.json"
+          ],
+          "removed": [
+            ".avm"
+          ]
+        }
+      }
     },
     {
       "name": "alz",
