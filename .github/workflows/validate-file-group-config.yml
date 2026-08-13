@@ -1,0 +1,25 @@
+---
+name: Validate File Group Config
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/_config.json"
+      - "terraform/**"
+      - "scripts/Test-FileGroupConfig.ps1"
+      - ".github/workflows/validate-file-group-config.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: "[AVM] Validate File Group Config"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate file group config
+        shell: pwsh
+        run: ./scripts/Test-FileGroupConfig.ps1
