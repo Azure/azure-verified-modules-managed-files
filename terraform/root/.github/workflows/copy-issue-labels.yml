@@ -68,6 +68,7 @@ jobs:
                     . == "Type: CI :rocket:" or
                     . == "Type: Hygiene :broom:" or
                     . == "dependencies" or
+                    . == "github-actions" or
                     . == "github_actions" or
                     . == "bug" or
                     . == "enhancement" or
