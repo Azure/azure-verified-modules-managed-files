@@ -49,42 +49,40 @@ jobs:
             esac
           }
 
-          mapfile -t closing_issues < <(
-            gh pr view "$PR_NUMBER" \
-              --repo "$REPOSITORY" \
-              --json closingIssuesReferences \
-              --jq '.closingIssuesReferences[].number'
-          )
+          closing_issues_file="$(mktemp)"
+          gh pr view "$PR_NUMBER" \
+            --repo "$REPOSITORY" \
+            --json closingIssuesReferences \
+            --jq '.closingIssuesReferences[].number' > "$closing_issues_file"
 
-          if [ "${#closing_issues[@]}" -eq 0 ]; then
+          if [ ! -s "$closing_issues_file" ]; then
             echo "No closing issues found."
             exit 0
           fi
 
           labels_file="$(mktemp)"
-          for issue in "${closing_issues[@]}"; do
+          while IFS= read -r issue; do
             gh issue view "$issue" \
               --repo "$REPOSITORY" \
               --json labels \
               --jq '.labels[].name' >> "$labels_file"
-          done
+          done < "$closing_issues_file"
 
-          mapfile -t labels < <(
-            while IFS= read -r label; do
-              if is_release_note_label "$label"; then
-                printf '%s\n' "$label"
-              fi
-            done < "$labels_file" | sort -u
-          )
+          release_labels_file="$(mktemp)"
+          while IFS= read -r label; do
+            if is_release_note_label "$label"; then
+              printf '%s\n' "$label"
+            fi
+          done < "$labels_file" | sort -u > "$release_labels_file"
 
-          if [ "${#labels[@]}" -eq 0 ]; then
+          if [ ! -s "$release_labels_file" ]; then
             echo "No release-note labels found on closing issues."
             exit 0
           fi
 
-          for label in "${labels[@]}"; do
+          while IFS= read -r label; do
             echo "Adding label: ${label}"
             gh issue edit "$PR_NUMBER" --repo "$REPOSITORY" --add-label "$label"
-          done
+          done < "$release_labels_file"
 
           gh issue edit "$PR_NUMBER" --repo "$REPOSITORY" --remove-label "Needs: Triage :mag:" || true
