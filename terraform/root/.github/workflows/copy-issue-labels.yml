@@ -1,0 +1,91 @@
+---
+name: Copy Issue Labels to PR
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  copy-labels:
+    name: Copy release-note labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy labels from closing issues
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          owner="${REPOSITORY%%/*}"
+          name="${REPOSITORY#*/}"
+
+          query='
+            query($owner: String!, $name: String!, $prNumber: Int!) {
+              repository(owner: $owner, name: $name) {
+                pullRequest(number: $prNumber) {
+                  closingIssuesReferences(first: 20) {
+                    nodes {
+                      labels(first: 50) {
+                        nodes {
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          '
+
+          mapfile -t labels < <(
+            gh api graphql \
+              -f query="$query" \
+              -f owner="$owner" \
+              -f name="$name" \
+              -F prNumber="$PR_NUMBER" \
+              --jq '
+                [
+                  .data.repository.pullRequest.closingIssuesReferences.nodes[]
+                  .labels.nodes[]
+                  .name
+                ]
+                | map(select(
+                    . == "Type: Bug :bug:" or
+                    . == "Type: Feature Request :heavy_plus_sign:" or
+                    . == "Type: Documentation :page_facing_up:" or
+                    . == "Type: CI :rocket:" or
+                    . == "Type: Hygiene :broom:" or
+                    . == "dependencies" or
+                    . == "github_actions" or
+                    . == "bug" or
+                    . == "enhancement" or
+                    . == "documentation"
+                  ))
+                | unique
+                | .[]
+              '
+          )
+
+          if [ "${#labels[@]}" -eq 0 ]; then
+            echo "No release-note labels found on closing issues."
+            exit 0
+          fi
+
+          for label in "${labels[@]}"; do
+            echo "Adding label: ${label}"
+            gh issue edit "$PR_NUMBER" --repo "$REPOSITORY" --add-label "$label"
+          done
+
+          gh issue edit "$PR_NUMBER" --repo "$REPOSITORY" --remove-label "Needs: Triage :mag:" || true
