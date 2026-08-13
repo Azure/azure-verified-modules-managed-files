@@ -28,55 +28,53 @@ jobs:
         run: |
           set -euo pipefail
 
-          owner="${REPOSITORY%%/*}"
-          name="${REPOSITORY#*/}"
+          is_release_note_label() {
+            case "$1" in
+              "Type: Bug :bug:" | \
+              "Type: Feature Request :heavy_plus_sign:" | \
+              "Type: Documentation :page_facing_up:" | \
+              "Type: CI :rocket:" | \
+              "Type: Hygiene :broom:" | \
+              dependencies | \
+              github-actions | \
+              github_actions | \
+              bug | \
+              enhancement | \
+              documentation)
+                return 0
+                ;;
+              *)
+                return 1
+                ;;
+            esac
+          }
 
-          query='
-            query($owner: String!, $name: String!, $prNumber: Int!) {
-              repository(owner: $owner, name: $name) {
-                pullRequest(number: $prNumber) {
-                  closingIssuesReferences(first: 20) {
-                    nodes {
-                      labels(first: 50) {
-                        nodes {
-                          name
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          '
+          mapfile -t closing_issues < <(
+            gh pr view "$PR_NUMBER" \
+              --repo "$REPOSITORY" \
+              --json closingIssuesReferences \
+              --jq '.closingIssuesReferences[].number'
+          )
+
+          if [ "${#closing_issues[@]}" -eq 0 ]; then
+            echo "No closing issues found."
+            exit 0
+          fi
+
+          labels_file="$(mktemp)"
+          for issue in "${closing_issues[@]}"; do
+            gh issue view "$issue" \
+              --repo "$REPOSITORY" \
+              --json labels \
+              --jq '.labels[].name' >> "$labels_file"
+          done
 
           mapfile -t labels < <(
-            gh api graphql \
-              -f query="$query" \
-              -f owner="$owner" \
-              -f name="$name" \
-              -F prNumber="$PR_NUMBER" \
-              --jq '
-                [
-                  .data.repository.pullRequest.closingIssuesReferences.nodes[]
-                  .labels.nodes[]
-                  .name
-                ]
-                | map(select(
-                    . == "Type: Bug :bug:" or
-                    . == "Type: Feature Request :heavy_plus_sign:" or
-                    . == "Type: Documentation :page_facing_up:" or
-                    . == "Type: CI :rocket:" or
-                    . == "Type: Hygiene :broom:" or
-                    . == "dependencies" or
-                    . == "github-actions" or
-                    . == "github_actions" or
-                    . == "bug" or
-                    . == "enhancement" or
-                    . == "documentation"
-                  ))
-                | unique
-                | .[]
-              '
+            while IFS= read -r label; do
+              if is_release_note_label "$label"; then
+                printf '%s\n' "$label"
+              fi
+            done < "$labels_file" | sort -u
           )
 
           if [ "${#labels[@]}" -eq 0 ]; then
