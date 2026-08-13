@@ -1,0 +1,7 @@
+{
+  "description": "Overrides for Azure Landing Zones pattern modules, whose issues and questions are triaged by the ALZ team rather than the AVM core team.",
+  "deletedFiles": [
+    ".github/ISSUE_TEMPLATE/avm_module_issue.yml",
+    ".github/ISSUE_TEMPLATE/avm_question_feedback.yml"
+  ]
+}
