@@ -25,235 +25,114 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Copy labels from closing issues
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        shell: bash
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          TRIAGE_LABEL: "Needs: Triage :mag:"
+        run: |
+          set -euo pipefail
+
+          # comm requires its inputs sorted the same way it compares them.
+          export LC_ALL=C
+
           # Labels worth carrying onto a pull request, matching the categories
           # and exclusions in .github/release.yml.
-          RELEASE_NOTE_LABELS: |
-            Type: Bug :bug:
-            Type: Feature Request :heavy_plus_sign:
-            Type: Documentation :page_facing_up:
-            Type: CI :rocket:
-            Type: Hygiene :broom:
-            dependencies
-            github-actions
-            github_actions
-            bug
-            enhancement
-            documentation
-          TRIAGE_LABEL: "Needs: Triage :mag:"
-        with:
-          script: |
-            // GraphQL rejects a query whose nesting could return more than
-            // 500,000 nodes, so each level gets its own limit rather than
-            // sharing one page size.
-            const PULL_REQUEST_LIMIT = 20;
-            const ISSUE_LIMIT = 20;
-            const LABEL_LIMIT = 100;
-            const REST_PAGE_SIZE = 100;
+          allowed="$(mktemp)"
+          sort -u > "$allowed" <<'LABELS'
+          Type: Bug :bug:
+          Type: Feature Request :heavy_plus_sign:
+          Type: Documentation :page_facing_up:
+          Type: CI :rocket:
+          Type: Hygiene :broom:
+          dependencies
+          github-actions
+          github_actions
+          bug
+          enhancement
+          documentation
+          LABELS
 
-            function requiredEnv(name) {
-              const value = process.env[name];
-              if (!value) {
-                throw new Error(`The ${name} environment variable is not set.`);
-              }
-              return value;
-            }
+          # Labels this repository actually has. Adding an unknown label fails
+          # the call, so intersect with this rather than guessing.
+          known="$(mktemp)"
+          gh label list --limit 500 --json name --jq '.[].name' | sort -u > "$known"
 
-            const { owner, repo } = context.repo;
-            const branch = context.ref.replace('refs/heads/', '');
-            const triageLabel = requiredEnv('TRIAGE_LABEL');
-            const releaseNoteLabels = new Set(
-              requiredEnv('RELEASE_NOTE_LABELS')
-                .split('\n')
-                .map((label) => label.trim())
-                .filter(Boolean),
-            );
+          # GitHub caps the pushed commit list at 20 entries, but the tip alone
+          # identifies the pull request for squash, merge, and rebase merges.
+          commits="$(jq -r '[.after] + [.commits[]?.id] | .[] | select(. != null and . != "")' \
+            "$GITHUB_EVENT_PATH" | sort -u)"
 
-            const MERGED_PULL_REQUESTS = `
-              query(
-                $owner: String!
-                $name: String!
-                $oid: GitObjectID!
-                $pullRequests: Int!
-                $issues: Int!
-                $labels: Int!
-              ) {
-                repository(owner: $owner, name: $name) {
-                  object(oid: $oid) {
-                    ... on Commit {
-                      associatedPullRequests(first: $pullRequests) {
-                        pageInfo { hasNextPage }
-                        nodes {
-                          number
-                          merged
-                          baseRefName
-                          closingIssuesReferences(first: $issues) {
-                            pageInfo { hasNextPage }
-                            nodes {
-                              number
-                              labels(first: $labels) {
-                                pageInfo { hasNextPage }
-                                nodes { name }
-                              }
-                            }
-                          }
+          # One query per commit yields its merged pull requests, their closing
+          # issues, and those issues' labels.
+          query='
+            query($owner: String!, $name: String!, $oid: GitObjectID!) {
+              repository(owner: $owner, name: $name) {
+                object(oid: $oid) {
+                  ... on Commit {
+                    associatedPullRequests(first: 20) {
+                      nodes {
+                        number
+                        merged
+                        baseRefName
+                        closingIssuesReferences(first: 20) {
+                          nodes { labels(first: 100) { nodes { name } } }
                         }
                       }
                     }
                   }
                 }
               }
-            `;
+            }'
 
-            function warnIfIncomplete(connection, limit, description) {
-              if (connection?.pageInfo?.hasNextPage) {
-                core.warning(`Read only the first ${limit} ${description}.`);
-              }
-            }
+          # Emit "<pull request>\t<label>" pairs, one per line.
+          pairs="$(mktemp)"
+          for oid in $commits; do
+            gh api graphql -f query="$query" \
+              -f owner="${GH_REPO%/*}" -f name="${GH_REPO#*/}" -f oid="$oid" \
+              | jq -r --arg branch "$BRANCH" '
+                  .data.repository.object.associatedPullRequests.nodes[]?
+                  | select(.merged and .baseRefName == $branch)
+                  | .number as $number
+                  | .closingIssuesReferences.nodes[]?.labels.nodes[]?.name
+                  | "\($number)\t\(.)"'
+          done | sort -u > "$pairs"
 
-            // GitHub caps the pushed commit list at 20 entries. The tip alone
-            // identifies the pull request for squash, merge, and rebase merges.
-            function pushedCommits() {
-              const listed = (context.payload.commits ?? [])
-                .map((commit) => commit.id)
-                .filter(Boolean);
-              const total = context.payload.size ?? listed.length;
+          if [ ! -s "$pairs" ]; then
+            echo "This push merged no pull requests with labeled closing issues."
+            exit 0
+          fi
 
-              if (listed.length < total) {
-                core.warning(
-                  `This push listed ${listed.length} of its ${total} commits. ` +
-                    'Pull requests reachable only from the omitted commits are not labeled.',
-                );
-              }
+          for pr in $(cut -f1 "$pairs" | sort -nu); do
+            echo "::group::Pull request #${pr}"
 
-              return [...new Set([context.sha, ...listed].filter(Boolean))];
-            }
+            found="$(mktemp)"
+            awk -F'\t' -v pr="$pr" '$1 == pr { print $2 }' "$pairs" | sort -u \
+              | comm -12 - "$allowed" > "$found"
 
-            async function mergedPullRequests(oid) {
-              const result = await github.graphql(MERGED_PULL_REQUESTS, {
-                owner,
-                name: repo,
-                oid,
-                pullRequests: PULL_REQUEST_LIMIT,
-                issues: ISSUE_LIMIT,
-                labels: LABEL_LIMIT,
-              });
+            # Warn rather than fail: a module repository may legitimately not
+            # carry every category label.
+            comm -13 "$known" "$found" | while IFS= read -r label; do
+              echo "::warning::Not copied because this repository has no such label: ${label}"
+            done
 
-              const associated = result.repository?.object?.associatedPullRequests;
-              warnIfIncomplete(
-                associated,
-                PULL_REQUEST_LIMIT,
-                `pull requests for commit ${oid}`,
-              );
+            copy="$(comm -12 "$found" "$known" | paste -sd, -)"
+            if [ -z "$copy" ]; then
+              echo "No release-note labels to copy."
+              echo "::endgroup::"
+              continue
+            fi
 
-              // A commit can also be associated with a pull request that merged
-              // somewhere else, so confirm this one merged into the pushed branch.
-              return (associated?.nodes ?? []).filter(
-                (pullRequest) =>
-                  pullRequest?.merged && pullRequest.baseRefName === branch,
-              );
-            }
+            echo "Adding: ${copy}"
+            gh issue edit "$pr" --add-label "$copy"
 
-            function labelsToCopy(pullRequest) {
-              const names = new Set();
-              const issues = pullRequest.closingIssuesReferences;
-              warnIfIncomplete(
-                issues,
-                ISSUE_LIMIT,
-                `closing issues for #${pullRequest.number}`,
-              );
+            # Only remove the triage label when it is actually present, so a
+            # blanket "|| true" cannot mask a real failure.
+            if gh issue view "$pr" --json labels --jq '.labels[].name' \
+              | grep -Fxq "$TRIAGE_LABEL"; then
+              gh issue edit "$pr" --remove-label "$TRIAGE_LABEL"
+            fi
 
-              for (const issue of issues?.nodes ?? []) {
-                warnIfIncomplete(
-                  issue.labels,
-                  LABEL_LIMIT,
-                  `labels on issue #${issue.number}`,
-                );
-
-                for (const label of issue.labels?.nodes ?? []) {
-                  if (releaseNoteLabels.has(label.name)) {
-                    names.add(label.name);
-                  }
-                }
-              }
-
-              return [...names].sort();
-            }
-
-            async function repositoryLabels() {
-              const labels = await github.paginate(
-                github.rest.issues.listLabelsForRepo,
-                { owner, repo, per_page: REST_PAGE_SIZE },
-              );
-              return new Set(labels.map((label) => label.name));
-            }
-
-            // Adding a label the repository does not have creates it, so only
-            // send known labels rather than inventing them in module repositories.
-            async function addExistingLabels(number, names, known) {
-              const present = names.filter((name) => known.has(name));
-              const missing = names.filter((name) => !known.has(name));
-
-              if (missing.length > 0) {
-                core.warning(
-                  `#${number}: not copied because this repository has no such label: ${missing.join(', ')}`,
-                );
-              }
-
-              if (present.length === 0) {
-                return false;
-              }
-
-              core.info(`#${number}: adding ${present.join(', ')}`);
-              await github.rest.issues.addLabels({
-                owner,
-                repo,
-                issue_number: number,
-                labels: present,
-              });
-              return true;
-            }
-
-            async function removeTriageLabel(number) {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner,
-                  repo,
-                  issue_number: number,
-                  name: triageLabel,
-                });
-              } catch (error) {
-                // The pull request simply was not awaiting triage.
-                if (error.status !== 404) {
-                  throw error;
-                }
-              }
-            }
-
-            const pullRequests = new Map();
-            for (const oid of pushedCommits()) {
-              for (const pullRequest of await mergedPullRequests(oid)) {
-                pullRequests.set(pullRequest.number, pullRequest);
-              }
-            }
-
-            if (pullRequests.size === 0) {
-              core.info('This push merged no pull requests.');
-              return;
-            }
-
-            const known = await repositoryLabels();
-
-            for (const pullRequest of pullRequests.values()) {
-              const names = labelsToCopy(pullRequest);
-
-              if (names.length === 0) {
-                core.info(`#${pullRequest.number}: no release-note labels to copy.`);
-                continue;
-              }
-
-              if (await addExistingLabels(pullRequest.number, names, known)) {
-                await removeTriageLabel(pullRequest.number);
-              }
-            }
+            echo "::endgroup::"
+          done
