@@ -19,9 +19,9 @@ permissions:
 jobs:
   copy-labels:
     name: Copy release-note labels
-    # Neither a deleted branch nor a rewritten history represents a merge, and
-    # a force push can leave an unrelated old commit as the tip.
-    if: ${{ !github.event.deleted && !github.event.forced }}
+    # A created, deleted, or force-pushed branch does not represent a merge,
+    # and any of them can leave an unrelated commit as the tip.
+    if: ${{ !github.event.created && !github.event.deleted && !github.event.forced }}
     runs-on: ubuntu-latest
     steps:
       - name: Copy labels from closing issues
