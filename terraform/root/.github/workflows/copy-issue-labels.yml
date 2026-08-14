@@ -2,35 +2,30 @@
 name: Copy Issue Labels to PR
 
 on:
-  pull_request:
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-      - ready_for_review
+  push:
+    branches:
+      - main
 
 permissions:
+  contents: read
   issues: write
   pull-requests: read
 
 concurrency:
-  group: copy-issue-labels-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: copy-issue-labels-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   copy-labels:
     name: Copy release-note labels
-    # Pull requests from forks get a read-only token and cannot be labeled.
-    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Copy labels from closing issues
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
 
@@ -55,44 +50,69 @@ jobs:
             esac
           }
 
-          closing_issues_file="$(mktemp)"
-          gh pr view "$PR_NUMBER" \
-            --repo "$REPOSITORY" \
-            --json closingIssuesReferences \
-            --jq '.closingIssuesReferences[].number' > "$closing_issues_file"
+          commits_file="$(mktemp)"
+          jq -r '[.head_commit.id // empty] + [.commits[]?.id] | .[]' \
+            "$GITHUB_EVENT_PATH" | sort -u > "$commits_file"
 
-          if [ ! -s "$closing_issues_file" ]; then
-            echo "No closing issues found."
+          if [ ! -s "$commits_file" ]; then
+            printf '%s\n' "$HEAD_SHA" > "$commits_file"
+          fi
+
+          pull_requests_file="$(mktemp)"
+          while IFS= read -r commit; do
+            gh api "repos/${REPOSITORY}/commits/${commit}/pulls" \
+              --jq '.[] | select(.merged_at != null) | .number'
+          done < "$commits_file" | sort -u > "$pull_requests_file"
+
+          if [ ! -s "$pull_requests_file" ]; then
+            echo "No merged pull requests found for this push."
             exit 0
           fi
 
-          labels_file="$(mktemp)"
-          while IFS= read -r issue; do
-            gh issue view "$issue" \
-              --repo "$REPOSITORY" \
-              --json labels \
-              --jq '.labels[].name' >> "$labels_file"
-          done < "$closing_issues_file"
+          while IFS= read -r pr; do
+            echo "::group::Pull request #${pr}"
 
-          release_labels_file="$(mktemp)"
-          while IFS= read -r label; do
-            if is_release_note_label "$label"; then
-              printf '%s\n' "$label"
+            closing_issues_file="$(mktemp)"
+            gh pr view "$pr" \
+              --repo "$REPOSITORY" \
+              --json closingIssuesReferences \
+              --jq '.closingIssuesReferences[].number' > "$closing_issues_file"
+
+            if [ ! -s "$closing_issues_file" ]; then
+              echo "No closing issues found."
+              echo "::endgroup::"
+              continue
             fi
-          done < "$labels_file" | sort -u > "$release_labels_file"
 
-          if [ ! -s "$release_labels_file" ]; then
-            echo "No release-note labels found on closing issues."
-            exit 0
-          fi
+            labels_file="$(mktemp)"
+            while IFS= read -r issue; do
+              gh issue view "$issue" \
+                --repo "$REPOSITORY" \
+                --json labels \
+                --jq '.labels[].name' >> "$labels_file"
+            done < "$closing_issues_file"
 
-          while IFS= read -r label; do
-            echo "Adding label: ${label}"
-            gh issue edit "$PR_NUMBER" \
+            release_labels_file="$(mktemp)"
+            while IFS= read -r label; do
+              if is_release_note_label "$label"; then
+                printf '%s\n' "$label"
+              fi
+            done < "$labels_file" | sort -u > "$release_labels_file"
+
+            if [ ! -s "$release_labels_file" ]; then
+              echo "No release-note labels found on closing issues."
+              echo "::endgroup::"
+              continue
+            fi
+
+            while IFS= read -r label; do
+              echo "Adding label: ${label}"
+              gh issue edit "$pr" --repo "$REPOSITORY" --add-label "$label" || true
+            done < "$release_labels_file"
+
+            gh issue edit "$pr" \
               --repo "$REPOSITORY" \
-              --add-label "$label" || true
-          done < "$release_labels_file"
+              --remove-label "Needs: Triage :mag:" || true
 
-          gh issue edit "$PR_NUMBER" \
-            --repo "$REPOSITORY" \
-            --remove-label "Needs: Triage :mag:" || true
+            echo "::endgroup::"
+          done < "$pull_requests_file"
