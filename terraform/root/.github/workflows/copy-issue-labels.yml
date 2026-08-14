@@ -11,47 +11,89 @@ permissions:
   issues: write
   pull-requests: read
 
-concurrency:
-  group: copy-issue-labels-${{ github.ref }}
-  cancel-in-progress: false
+# No concurrency group on purpose. GitHub keeps only one pending run per group,
+# so a third rapid push would evict the second one and its pull request would
+# never be labeled. Every operation here is idempotent, so overlapping runs are
+# harmless.
 
 jobs:
   copy-labels:
     name: Copy release-note labels
-    if: ${{ !github.event.deleted }}
+    # Neither a deleted branch nor a rewritten history represents a merge, and
+    # a force push can leave an unrelated old commit as the tip.
+    if: ${{ !github.event.deleted && !github.event.forced }}
     runs-on: ubuntu-latest
     steps:
       - name: Copy labels from closing issues
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          # Labels worth carrying onto a pull request, matching the categories
+          # and exclusions in .github/release.yml.
+          RELEASE_NOTE_LABELS: |
+            Type: Bug :bug:
+            Type: Feature Request :heavy_plus_sign:
+            Type: Documentation :page_facing_up:
+            Type: CI :rocket:
+            Type: Hygiene :broom:
+            dependencies
+            github-actions
+            github_actions
+            bug
+            enhancement
+            documentation
+          TRIAGE_LABEL: "Needs: Triage :mag:"
         with:
           script: |
-            const RELEASE_NOTE_LABELS = new Set([
-              'Type: Bug :bug:',
-              'Type: Feature Request :heavy_plus_sign:',
-              'Type: Documentation :page_facing_up:',
-              'Type: CI :rocket:',
-              'Type: Hygiene :broom:',
-              'dependencies',
-              'github-actions',
-              'github_actions',
-              'bug',
-              'enhancement',
-              'documentation',
-            ]);
-            const TRIAGE_LABEL = 'Needs: Triage :mag:';
+            // GraphQL rejects a query whose nesting could return more than
+            // 500,000 nodes, so each level gets its own limit rather than
+            // sharing one page size.
+            const PULL_REQUEST_LIMIT = 20;
+            const ISSUE_LIMIT = 20;
+            const LABEL_LIMIT = 100;
+            const REST_PAGE_SIZE = 100;
 
-            const query = `
-              query($owner: String!, $name: String!, $oid: GitObjectID!) {
+            function requiredEnv(name) {
+              const value = process.env[name];
+              if (!value) {
+                throw new Error(`The ${name} environment variable is not set.`);
+              }
+              return value;
+            }
+
+            const { owner, repo } = context.repo;
+            const branch = context.ref.replace('refs/heads/', '');
+            const triageLabel = requiredEnv('TRIAGE_LABEL');
+            const releaseNoteLabels = new Set(
+              requiredEnv('RELEASE_NOTE_LABELS')
+                .split('\n')
+                .map((label) => label.trim())
+                .filter(Boolean),
+            );
+
+            const MERGED_PULL_REQUESTS = `
+              query(
+                $owner: String!
+                $name: String!
+                $oid: GitObjectID!
+                $pullRequests: Int!
+                $issues: Int!
+                $labels: Int!
+              ) {
                 repository(owner: $owner, name: $name) {
                   object(oid: $oid) {
                     ... on Commit {
-                      associatedPullRequests(first: 10) {
+                      associatedPullRequests(first: $pullRequests) {
+                        pageInfo { hasNextPage }
                         nodes {
                           number
                           merged
-                          closingIssuesReferences(first: 20) {
+                          baseRefName
+                          closingIssuesReferences(first: $issues) {
+                            pageInfo { hasNextPage }
                             nodes {
-                              labels(first: 100) {
+                              number
+                              labels(first: $labels) {
+                                pageInfo { hasNextPage }
                                 nodes { name }
                               }
                             }
@@ -64,76 +106,154 @@ jobs:
               }
             `;
 
-            const { owner, repo } = context.repo;
-            const pushed = (context.payload.commits ?? [])
-              .map((commit) => commit.id)
-              .filter(Boolean);
-            const commits = new Set([context.sha, ...pushed].filter(Boolean));
-
-            const labelsByPullRequest = new Map();
-
-            for (const oid of commits) {
-              const result = await github.graphql(query, { owner, name: repo, oid });
-              const pullRequests =
-                result.repository?.object?.associatedPullRequests?.nodes ?? [];
-
-              for (const pullRequest of pullRequests) {
-                if (!pullRequest?.merged) {
-                  continue;
-                }
-
-                const labels =
-                  labelsByPullRequest.get(pullRequest.number) ?? new Set();
-
-                for (const issue of pullRequest.closingIssuesReferences?.nodes ?? []) {
-                  for (const label of issue?.labels?.nodes ?? []) {
-                    if (RELEASE_NOTE_LABELS.has(label.name)) {
-                      labels.add(label.name);
-                    }
-                  }
-                }
-
-                labelsByPullRequest.set(pullRequest.number, labels);
+            function warnIfIncomplete(connection, limit, description) {
+              if (connection?.pageInfo?.hasNextPage) {
+                core.warning(`Read only the first ${limit} ${description}.`);
               }
             }
 
-            if (labelsByPullRequest.size === 0) {
-              core.info('No merged pull requests found for this push.');
-              return;
+            // GitHub caps the pushed commit list at 20 entries. The tip alone
+            // identifies the pull request for squash, merge, and rebase merges.
+            function pushedCommits() {
+              const listed = (context.payload.commits ?? [])
+                .map((commit) => commit.id)
+                .filter(Boolean);
+              const total = context.payload.size ?? listed.length;
+
+              if (listed.length < total) {
+                core.warning(
+                  `This push listed ${listed.length} of its ${total} commits. ` +
+                    'Pull requests reachable only from the omitted commits are not labeled.',
+                );
+              }
+
+              return [...new Set([context.sha, ...listed].filter(Boolean))];
             }
 
-            // A label copied from an issue already exists in that issue's
-            // repository, so a 404 here means it is absent from this one.
-            const ignoreMissing = async (description, request) => {
+            async function mergedPullRequests(oid) {
+              const result = await github.graphql(MERGED_PULL_REQUESTS, {
+                owner,
+                name: repo,
+                oid,
+                pullRequests: PULL_REQUEST_LIMIT,
+                issues: ISSUE_LIMIT,
+                labels: LABEL_LIMIT,
+              });
+
+              const associated = result.repository?.object?.associatedPullRequests;
+              warnIfIncomplete(
+                associated,
+                PULL_REQUEST_LIMIT,
+                `pull requests for commit ${oid}`,
+              );
+
+              // A commit can also be associated with a pull request that merged
+              // somewhere else, so confirm this one merged into the pushed branch.
+              return (associated?.nodes ?? []).filter(
+                (pullRequest) =>
+                  pullRequest?.merged && pullRequest.baseRefName === branch,
+              );
+            }
+
+            function labelsToCopy(pullRequest) {
+              const names = new Set();
+              const issues = pullRequest.closingIssuesReferences;
+              warnIfIncomplete(
+                issues,
+                ISSUE_LIMIT,
+                `closing issues for #${pullRequest.number}`,
+              );
+
+              for (const issue of issues?.nodes ?? []) {
+                warnIfIncomplete(
+                  issue.labels,
+                  LABEL_LIMIT,
+                  `labels on issue #${issue.number}`,
+                );
+
+                for (const label of issue.labels?.nodes ?? []) {
+                  if (releaseNoteLabels.has(label.name)) {
+                    names.add(label.name);
+                  }
+                }
+              }
+
+              return [...names].sort();
+            }
+
+            async function repositoryLabels() {
+              const labels = await github.paginate(
+                github.rest.issues.listLabelsForRepo,
+                { owner, repo, per_page: REST_PAGE_SIZE },
+              );
+              return new Set(labels.map((label) => label.name));
+            }
+
+            // Adding a label the repository does not have creates it, so only
+            // send known labels rather than inventing them in module repositories.
+            async function addExistingLabels(number, names, known) {
+              const present = names.filter((name) => known.has(name));
+              const missing = names.filter((name) => !known.has(name));
+
+              if (missing.length > 0) {
+                core.warning(
+                  `#${number}: not copied because this repository has no such label: ${missing.join(', ')}`,
+                );
+              }
+
+              if (present.length === 0) {
+                return false;
+              }
+
+              core.info(`#${number}: adding ${present.join(', ')}`);
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: number,
+                labels: present,
+              });
+              return true;
+            }
+
+            async function removeTriageLabel(number) {
               try {
-                await request();
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: number,
+                  name: triageLabel,
+                });
               } catch (error) {
+                // The pull request simply was not awaiting triage.
                 if (error.status !== 404) {
                   throw error;
                 }
-                core.warning(`${description} failed because it does not exist.`);
               }
-            };
+            }
 
-            for (const [issue_number, labels] of labelsByPullRequest) {
-              if (labels.size === 0) {
-                core.info(`#${issue_number}: no release-note labels on closing issues.`);
+            const pullRequests = new Map();
+            for (const oid of pushedCommits()) {
+              for (const pullRequest of await mergedPullRequests(oid)) {
+                pullRequests.set(pullRequest.number, pullRequest);
+              }
+            }
+
+            if (pullRequests.size === 0) {
+              core.info('This push merged no pull requests.');
+              return;
+            }
+
+            const known = await repositoryLabels();
+
+            for (const pullRequest of pullRequests.values()) {
+              const names = labelsToCopy(pullRequest);
+
+              if (names.length === 0) {
+                core.info(`#${pullRequest.number}: no release-note labels to copy.`);
                 continue;
               }
 
-              const names = [...labels].sort();
-              core.info(`#${issue_number}: adding ${names.join(', ')}`);
-
-              await ignoreMissing(`Adding labels to #${issue_number}`, () =>
-                github.rest.issues.addLabels({ owner, repo, issue_number, labels: names }),
-              );
-
-              await ignoreMissing(`Removing '${TRIAGE_LABEL}' from #${issue_number}`, () =>
-                github.rest.issues.removeLabel({
-                  owner,
-                  repo,
-                  issue_number,
-                  name: TRIAGE_LABEL,
-                }),
-              );
+              if (await addExistingLabels(pullRequest.number, names, known)) {
+                await removeTriageLabel(pullRequest.number);
+              }
             }
