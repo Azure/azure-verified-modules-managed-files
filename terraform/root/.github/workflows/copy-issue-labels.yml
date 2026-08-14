@@ -38,7 +38,8 @@ jobs:
           export LC_ALL=C
 
           # Labels worth carrying onto a pull request, matching the categories
-          # and exclusions in .github/release.yml.
+          # and exclusions in .github/release.yml. These are passed to gh as a
+          # comma-separated list, so a label name may not contain a comma.
           allowed="$(mktemp)"
           sort -u > "$allowed" <<'LABELS'
           Type: Bug :bug:
