@@ -8,8 +8,8 @@ on:
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: read
+  issues: read
+  pull-requests: write
 
 jobs:
   copy-labels:
@@ -22,22 +22,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           BRANCH: ${{ github.ref_name }}
-          TRIAGE_LABEL: "Needs: Triage :mag:"
         run: |
           set -euo pipefail
 
-          # Release-note categories, matching .github/release.yml. Copied
-          # labels are passed to gh as one comma-separated list, so a name
-          # here may not contain a comma.
+          # The labels .github/release.yml sorts into a category. Keep the two
+          # in sync. Labels are passed to gh as one comma-separated list, so a
+          # name here may not contain a comma.
           cat > categories <<'CATEGORIES'
           Type: Bug :bug:
           Type: Feature Request :heavy_plus_sign:
           Type: Documentation :page_facing_up:
           Type: CI :rocket:
           Type: Hygiene :broom:
-          dependencies
-          github-actions
-          github_actions
           bug
           enhancement
           documentation
@@ -57,22 +53,10 @@ jobs:
           fi
 
           number="$(jq -r '.number' pull_request.json)"
-          jq -r '.labels[].name' pull_request.json > current
-
-          # Removing a label a pull request does not have is a no-op, but
-          # removing one the repository does not have fails, so only ask when
-          # it is really there.
-          remove=""
-          if grep -qxF "$TRIAGE_LABEL" current; then
-            remove="$TRIAGE_LABEL"
-          fi
 
           # 2. A pull request that is already categorized needs nothing copied.
-          if grep -qxFf categories current; then
+          if jq -r '.labels[].name' pull_request.json | grep -qxFf categories; then
             echo "#${number} is already labeled."
-            if [ -n "$remove" ]; then
-              gh issue edit "$number" --remove-label "$remove"
-            fi
             exit 0
           fi
 
@@ -97,8 +81,4 @@ jobs:
           fi
 
           echo "Copying to #${number}: ${copy}"
-          if [ -n "$remove" ]; then
-            gh issue edit "$number" --add-label "$copy" --remove-label "$remove"
-          else
-            gh issue edit "$number" --add-label "$copy"
-          fi
+          gh pr edit "$number" --add-label "$copy"
