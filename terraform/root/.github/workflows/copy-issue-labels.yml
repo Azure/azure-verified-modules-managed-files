@@ -18,101 +18,122 @@ concurrency:
 jobs:
   copy-labels:
     name: Copy release-note labels
+    if: ${{ !github.event.deleted }}
     runs-on: ubuntu-latest
     steps:
       - name: Copy labels from closing issues
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const RELEASE_NOTE_LABELS = new Set([
+              'Type: Bug :bug:',
+              'Type: Feature Request :heavy_plus_sign:',
+              'Type: Documentation :page_facing_up:',
+              'Type: CI :rocket:',
+              'Type: Hygiene :broom:',
+              'dependencies',
+              'github-actions',
+              'github_actions',
+              'bug',
+              'enhancement',
+              'documentation',
+            ]);
+            const TRIAGE_LABEL = 'Needs: Triage :mag:';
 
-          is_release_note_label() {
-            case "$1" in
-              "Type: Bug :bug:" | \
-              "Type: Feature Request :heavy_plus_sign:" | \
-              "Type: Documentation :page_facing_up:" | \
-              "Type: CI :rocket:" | \
-              "Type: Hygiene :broom:" | \
-              dependencies | \
-              github-actions | \
-              github_actions | \
-              bug | \
-              enhancement | \
-              documentation)
-                return 0
-                ;;
-              *)
-                return 1
-                ;;
-            esac
-          }
+            const query = `
+              query($owner: String!, $name: String!, $oid: GitObjectID!) {
+                repository(owner: $owner, name: $name) {
+                  object(oid: $oid) {
+                    ... on Commit {
+                      associatedPullRequests(first: 10) {
+                        nodes {
+                          number
+                          merged
+                          closingIssuesReferences(first: 20) {
+                            nodes {
+                              labels(first: 100) {
+                                nodes { name }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
 
-          commits_file="$(mktemp)"
-          jq -r '[.head_commit.id // empty] + [.commits[]?.id] | .[]' \
-            "$GITHUB_EVENT_PATH" | sort -u > "$commits_file"
+            const { owner, repo } = context.repo;
+            const pushed = (context.payload.commits ?? [])
+              .map((commit) => commit.id)
+              .filter(Boolean);
+            const commits = new Set([context.sha, ...pushed].filter(Boolean));
 
-          if [ ! -s "$commits_file" ]; then
-            printf '%s\n' "$HEAD_SHA" > "$commits_file"
-          fi
+            const labelsByPullRequest = new Map();
 
-          pull_requests_file="$(mktemp)"
-          while IFS= read -r commit; do
-            gh api "repos/${REPOSITORY}/commits/${commit}/pulls" \
-              --jq '.[] | select(.merged_at != null) | .number'
-          done < "$commits_file" | sort -u > "$pull_requests_file"
+            for (const oid of commits) {
+              const result = await github.graphql(query, { owner, name: repo, oid });
+              const pullRequests =
+                result.repository?.object?.associatedPullRequests?.nodes ?? [];
 
-          if [ ! -s "$pull_requests_file" ]; then
-            echo "No merged pull requests found for this push."
-            exit 0
-          fi
+              for (const pullRequest of pullRequests) {
+                if (!pullRequest?.merged) {
+                  continue;
+                }
 
-          while IFS= read -r pr; do
-            echo "::group::Pull request #${pr}"
+                const labels =
+                  labelsByPullRequest.get(pullRequest.number) ?? new Set();
 
-            closing_issues_file="$(mktemp)"
-            gh pr view "$pr" \
-              --repo "$REPOSITORY" \
-              --json closingIssuesReferences \
-              --jq '.closingIssuesReferences[].number' > "$closing_issues_file"
+                for (const issue of pullRequest.closingIssuesReferences?.nodes ?? []) {
+                  for (const label of issue?.labels?.nodes ?? []) {
+                    if (RELEASE_NOTE_LABELS.has(label.name)) {
+                      labels.add(label.name);
+                    }
+                  }
+                }
 
-            if [ ! -s "$closing_issues_file" ]; then
-              echo "No closing issues found."
-              echo "::endgroup::"
-              continue
-            fi
+                labelsByPullRequest.set(pullRequest.number, labels);
+              }
+            }
 
-            labels_file="$(mktemp)"
-            while IFS= read -r issue; do
-              gh issue view "$issue" \
-                --repo "$REPOSITORY" \
-                --json labels \
-                --jq '.labels[].name' >> "$labels_file"
-            done < "$closing_issues_file"
+            if (labelsByPullRequest.size === 0) {
+              core.info('No merged pull requests found for this push.');
+              return;
+            }
 
-            release_labels_file="$(mktemp)"
-            while IFS= read -r label; do
-              if is_release_note_label "$label"; then
-                printf '%s\n' "$label"
-              fi
-            done < "$labels_file" | sort -u > "$release_labels_file"
+            // A label copied from an issue already exists in that issue's
+            // repository, so a 404 here means it is absent from this one.
+            const ignoreMissing = async (description, request) => {
+              try {
+                await request();
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+                core.warning(`${description} failed because it does not exist.`);
+              }
+            };
 
-            if [ ! -s "$release_labels_file" ]; then
-              echo "No release-note labels found on closing issues."
-              echo "::endgroup::"
-              continue
-            fi
+            for (const [issue_number, labels] of labelsByPullRequest) {
+              if (labels.size === 0) {
+                core.info(`#${issue_number}: no release-note labels on closing issues.`);
+                continue;
+              }
 
-            while IFS= read -r label; do
-              echo "Adding label: ${label}"
-              gh issue edit "$pr" --repo "$REPOSITORY" --add-label "$label" || true
-            done < "$release_labels_file"
+              const names = [...labels].sort();
+              core.info(`#${issue_number}: adding ${names.join(', ')}`);
 
-            gh issue edit "$pr" \
-              --repo "$REPOSITORY" \
-              --remove-label "Needs: Triage :mag:" || true
+              await ignoreMissing(`Adding labels to #${issue_number}`, () =>
+                github.rest.issues.addLabels({ owner, repo, issue_number, labels: names }),
+              );
 
-            echo "::endgroup::"
-          done < "$pull_requests_file"
+              await ignoreMissing(`Removing '${TRIAGE_LABEL}' from #${issue_number}`, () =>
+                github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number,
+                  name: TRIAGE_LABEL,
+                }),
+              );
+            }
