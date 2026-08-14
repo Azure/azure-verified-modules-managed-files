@@ -11,20 +11,12 @@ permissions:
   issues: write
   pull-requests: read
 
-# No concurrency group on purpose. GitHub keeps only one pending run per group,
-# so a third rapid push would evict the second one and its pull request would
-# never be labeled. Every operation here is idempotent, so overlapping runs are
-# harmless.
-
 jobs:
   copy-labels:
     name: Copy release-note labels
-    # A created, deleted, or force-pushed branch does not represent a merge,
-    # and any of them can leave an unrelated commit as the tip.
-    if: ${{ !github.event.created && !github.event.deleted && !github.event.forced }}
     runs-on: ubuntu-latest
     steps:
-      - name: Copy labels from closing issues
+      - name: Copy labels from the closing issues
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -34,14 +26,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          # comm requires its inputs sorted the same way it compares them.
-          export LC_ALL=C
-
-          # Labels worth carrying onto a pull request, matching the categories
-          # and exclusions in .github/release.yml. These are passed to gh as a
-          # comma-separated list, so a label name may not contain a comma.
-          allowed="$(mktemp)"
-          sort -u > "$allowed" <<'LABELS'
+          # Release-note categories, matching .github/release.yml. Copied
+          # labels are passed to gh as one comma-separated list, so a name
+          # here may not contain a comma.
+          cat > categories <<'CATEGORIES'
           Type: Bug :bug:
           Type: Feature Request :heavy_plus_sign:
           Type: Documentation :page_facing_up:
@@ -53,89 +41,64 @@ jobs:
           bug
           enhancement
           documentation
-          LABELS
+          CATEGORIES
 
-          # Labels this repository actually has. A label on an issue here
-          # necessarily exists here, so this only matters for the rare cases of
-          # a cross-repository linked issue or a label deleted mid-run. Adding
-          # an unknown label fails the call, so skip and warn instead.
-          known="$(mktemp)"
-          gh label list --limit 500 --json name --jq '.[].name' | sort -u > "$known"
+          # 1. Find the pull request this push merged. Squash, merge, and
+          # rebase merges all associate it with the pushed commit. Requiring
+          # the base branch skips a pull request that merged somewhere else.
+          gh api "repos/${GH_REPO}/commits/${GITHUB_SHA}/pulls" \
+            | jq --arg branch "$BRANCH" \
+              'first(.[] | select(.merged_at != null and .base.ref == $branch))' \
+            > pull_request.json
 
-          # GitHub caps the pushed commit list at 20 entries, but the tip alone
-          # identifies the pull request for squash, merge, and rebase merges.
-          commits="$(jq -r '[.after] + [.commits[]?.id] | .[] | select(. != null and . != "")' \
-            "$GITHUB_EVENT_PATH" | sort -u)"
-
-          # One query per commit yields its merged pull requests, their closing
-          # issues, and those issues' labels.
-          query='
-            query($owner: String!, $name: String!, $oid: GitObjectID!) {
-              repository(owner: $owner, name: $name) {
-                object(oid: $oid) {
-                  ... on Commit {
-                    associatedPullRequests(first: 20) {
-                      nodes {
-                        number
-                        merged
-                        baseRefName
-                        closingIssuesReferences(first: 20) {
-                          nodes { labels(first: 100) { nodes { name } } }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }'
-
-          # Emit "<pull request>\t<label>" pairs, one per line.
-          pairs="$(mktemp)"
-          for oid in $commits; do
-            gh api graphql -f query="$query" \
-              -f owner="${GH_REPO%/*}" -f name="${GH_REPO#*/}" -f oid="$oid" \
-              | jq -r --arg branch "$BRANCH" '
-                  .data.repository.object.associatedPullRequests.nodes[]?
-                  | select(.merged and .baseRefName == $branch)
-                  | .number as $number
-                  | .closingIssuesReferences.nodes[]?.labels.nodes[]?.name
-                  | "\($number)\t\(.)"'
-          done | sort -u > "$pairs"
-
-          if [ ! -s "$pairs" ]; then
-            echo "This push merged no pull requests with labeled closing issues."
+          if [ ! -s pull_request.json ]; then
+            echo "This push did not merge a pull request into ${BRANCH}."
             exit 0
           fi
 
-          for pr in $(cut -f1 "$pairs" | sort -nu); do
-            echo "::group::Pull request #${pr}"
+          number="$(jq -r '.number' pull_request.json)"
+          jq -r '.labels[].name' pull_request.json > current
 
-            found="$(mktemp)"
-            awk -F'\t' -v pr="$pr" '$1 == pr { print $2 }' "$pairs" | sort -u \
-              | comm -12 - "$allowed" > "$found"
+          # Removing a label a pull request does not have is a no-op, but
+          # removing one the repository does not have fails, so only ask when
+          # it is really there.
+          remove=""
+          if grep -qxF "$TRIAGE_LABEL" current; then
+            remove="$TRIAGE_LABEL"
+          fi
 
-            # Warn rather than fail: a module repository may legitimately not
-            # carry every category label.
-            comm -13 "$known" "$found" | while IFS= read -r label; do
-              echo "::warning::Not copied because this repository has no such label: ${label}"
-            done
-
-            copy="$(comm -12 "$found" "$known" | paste -sd, -)"
-            if [ -z "$copy" ]; then
-              echo "No release-note labels to copy."
-              echo "::endgroup::"
-              continue
+          # 2. A pull request that is already categorized needs nothing copied.
+          if grep -qxFf categories current; then
+            echo "#${number} is already labeled."
+            if [ -n "$remove" ]; then
+              gh issue edit "$number" --remove-label "$remove"
             fi
+            exit 0
+          fi
 
-            echo "Adding: ${copy}"
-            gh issue edit "$pr" --add-label "$copy"
+          # 3. Copy the categories from the issues it closes. Issues in another
+          # repository are skipped, because their labels need not exist here.
+          gh pr view "$number" --json closingIssuesReferences \
+            | jq -r --arg repo "$GH_REPO" \
+              '.closingIssuesReferences[]
+               | select(.repository.owner.login + "/" + .repository.name == $repo)
+               | .number' \
+            > issues
 
-            # Only remove the triage label when it is actually present, so a
-            # blanket "|| true" cannot mask a real failure.
-            if gh issue view "$pr" --json labels --jq '.labels[].name' \
-              | grep -Fxq "$TRIAGE_LABEL"; then
-              gh issue edit "$pr" --remove-label "$TRIAGE_LABEL"
-            fi
+          copy="$(
+            while IFS= read -r issue; do
+              gh issue view "$issue" --json labels --jq '.labels[].name'
+            done < issues | grep -xFf categories | sort -u | paste -sd, - || true
+          )"
 
-            echo "::endgroup::"
-          done
+          if [ -z "$copy" ]; then
+            echo "#${number} closes no categorized issue."
+            exit 0
+          fi
+
+          echo "Copying to #${number}: ${copy}"
+          if [ -n "$remove" ]; then
+            gh issue edit "$number" --add-label "$copy" --remove-label "$remove"
+          else
+            gh issue edit "$number" --add-label "$copy"
+          fi
