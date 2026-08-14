@@ -55,8 +55,10 @@ jobs:
           documentation
           LABELS
 
-          # Labels this repository actually has. Adding an unknown label fails
-          # the call, so intersect with this rather than guessing.
+          # Labels this repository actually has. A label on an issue here
+          # necessarily exists here, so this only matters for the rare cases of
+          # a cross-repository linked issue or a label deleted mid-run. Adding
+          # an unknown label fails the call, so skip and warn instead.
           known="$(mktemp)"
           gh label list --limit 500 --json name --jq '.[].name' | sort -u > "$known"
 
