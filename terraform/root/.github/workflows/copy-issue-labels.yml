@@ -39,9 +39,13 @@ jobs:
           documentation
           CATEGORIES
 
-          # 1. Find the pull request this push merged. Squash, merge, and
-          # rebase merges all associate it with the pushed commit. Requiring
-          # the base branch skips a pull request that merged somewhere else.
+          # 1. Find the pull request this push merged. These repositories
+          # allow only squash merges, so the pushed commit belongs to exactly
+          # one. The merge state is still checked, because the endpoint also
+          # reports a pull request that merely contains the commit and has
+          # not merged, and the base branch is still checked, because
+          # allowing merge commits again would put commits on this branch
+          # that were merged into another one.
           gh api "repos/${GH_REPO}/commits/${GITHUB_SHA}/pulls" \
             | jq --arg branch "$BRANCH" \
               'first(.[] | select(.merged_at != null and .base.ref == $branch))' \
