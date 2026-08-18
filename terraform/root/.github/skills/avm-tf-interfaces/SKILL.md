@@ -11,7 +11,7 @@ Read the current RMFR4, RMFR5, TFFR6, TFFR7, TFFR8, and TFNFR38 pages through <h
 
 For every RMFR4 or RMFR5 interface migration, fetch both current sources from `Azure/Azure-Verified-Modules`:
 
-- `docs/content/specs-defs/specs/terraform/interfaces.md`
+- `https://raw.githubusercontent.com/Azure/Azure-Verified-Modules/refs/heads/main/docs/content/specs-defs/specs/terraform/interfaces.md`
 - the matching `https://raw.githubusercontent.com/Azure/Azure-Verified-Modules/refs/heads/main/docs/static/includes/interfaces/tf/int.<interface>.schema.tf`
 
 Treat the entire canonical variable declaration as atomic. Copy it in full and replace only documented placeholders; preserve attribute ordering, types, defaults, nullability, descriptions, validations, and error messages exactly. Lint notices are migration hints, not complete implementation instructions.
