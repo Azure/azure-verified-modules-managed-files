@@ -1,7 +1,6 @@
 {
   "description": "Files synced to every AVM Terraform module repository.",
   "deletedFiles": [
-    ".devcontainer/devcontainer.json",
     ".agents/skills/AVM-Terraform-Development/AzAPI.md",
     ".agents/skills/AVM-Terraform-Development/SKILL.md",
     ".agents/skills/AVM-Terraform-Development/azure-schema",
