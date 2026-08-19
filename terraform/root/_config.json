@@ -36,7 +36,8 @@
     "avm.ps1",
     "avm.config.json",
     "locals.telemetry.tf",
-    "locals.version.tf.json"
+    "locals.version.tf.json",
+    "tests/unit/unit.go"
   ],
   "managedLines": {
     ".gitignore": {
