@@ -640,7 +640,7 @@ steps:
           queries:[],
           candidate_count:0,
           open_candidate_count:0,
-          
+          must_compare:[],
           candidates:[]
         }' > "${INDEX_FILE}"
     }
@@ -843,6 +843,11 @@ steps:
             | sort_by(.number)
           ) as $candidates
         | ([$candidates[] | select(.state == "open") | .number] | sort) as $open_numbers
+        | ([$candidates[]
+            | select(.lexical_relevance.score >= 12)]
+           | sort_by(-.lexical_relevance.score, .number)
+           | .[0:6]
+           | map(.number)) as $must_compare
         | {
             version: $version,
             issue_number: ($issue | tonumber),
@@ -855,6 +860,7 @@ steps:
             queries: $queries[0],
             candidate_count: ($candidates | length),
             open_candidate_count: ($open_numbers | length),
+            must_compare: $must_compare,
             candidates: $candidates
           }
       ' > "${INDEX_FILE}"
@@ -880,6 +886,10 @@ steps:
       exit 0
     fi
     if ! jq -r '
+        def numlist($nums):
+          if (($nums // []) | length) == 0 then "none"
+          else (($nums // []) | map("#" + (. | tostring)) | join(", "))
+          end;
         ["- Prefetched duplicate searches (from `issue-candidate-index.json`):"]
         + (
             .queries
@@ -892,6 +902,7 @@ steps:
                   )
               )
           )
+        + ["- Candidates requiring explicit comparison: " + numlist(.must_compare)]
         | .[]
       ' "${INDEX_FILE}" > "${AUDIT_FILE}"; then
       write_fallback "render failed"
@@ -1030,14 +1041,18 @@ Earlier triage comments on this issue — including ones you wrote in previous r
 A pre-agent step has already issued a fixed set of issue searches and written `/tmp/gh-aw/agent/issue-candidate-index.json`. Read it **before** searching yourself. Run these direct-path checks exactly:
 
 ```bash
-jq -e '. as $index | type == "object" and .loaded == true and .complete == true and .success == true and (.errors == []) and (.version == 1) and (.query_count | type == "number") and (.queries | type == "array") and (.candidate_count | type == "number") and (.candidates | type == "array") and (.open_candidate_count | type == "number") and (.query_count == (.queries | length)) and (.candidate_count == (.candidates | length)) and (.open_candidate_count == ([.candidates[] | select(.state == "open")] | length)) and ([.candidates[].number] | unique | length) == .candidate_count and (all(.queries[]; (.query | type == "string") and (.numbers | type == "array"))) and (all(.candidates[]; (.number | type == "number") and (.title | type == "string") and (.state | type == "string") and (.created_at | type == "string") and (.url | type == "string") and (.body_excerpt | type == "string") and (.body_excerpt | length) <= 280 and (.matched_queries | type == "array") and (.matched_queries | length > 0) and (.lexical_relevance.score | type == "number") and (.lexical_relevance.signals | type == "object")))' /tmp/gh-aw/agent/issue-candidate-index.json
-jq '{query_count,candidate_count,open_candidate_count,queries:[.queries[] | {query,total_count,matched:(.numbers | length)}]}' /tmp/gh-aw/agent/issue-candidate-index.json
+jq -e '. as $index | type == "object" and .loaded == true and .complete == true and .success == true and (.errors == []) and (.version == 1) and (.query_count | type == "number") and (.queries | type == "array") and (.candidate_count | type == "number") and (.candidates | type == "array") and (.open_candidate_count | type == "number") and (.must_compare | type == "array") and ((.must_compare - [.candidates[].number]) == []) and (.query_count == (.queries | length)) and (.candidate_count == (.candidates | length)) and (.open_candidate_count == ([.candidates[] | select(.state == "open")] | length)) and ([.candidates[].number] | unique | length) == .candidate_count and (all(.queries[]; (.query | type == "string") and (.numbers | type == "array"))) and (all(.candidates[]; (.number | type == "number") and (.title | type == "string") and (.state | type == "string") and (.created_at | type == "string") and (.url | type == "string") and (.body_excerpt | type == "string") and (.body_excerpt | length) <= 280 and (.matched_queries | type == "array") and (.matched_queries | length > 0) and (.lexical_relevance.score | type == "number") and (.lexical_relevance.signals | type == "object")))' /tmp/gh-aw/agent/issue-candidate-index.json
+jq '{query_count,candidate_count,open_candidate_count,must_compare,queries:[.queries[] | {query,total_count,matched:(.numbers | length)}]}' /tmp/gh-aw/agent/issue-candidate-index.json
 jq '.candidates[] | {number,title,state,created_at,url,body_excerpt,matched_queries,lexical_relevance}' /tmp/gh-aw/agent/issue-candidate-index.json
 ```
 
 The queries are derived from the issue title by a fixed tokenizer, not by the model: it takes the four most distinctive title terms, issues every pair of them, and adds remedy-worded variants of the strongest term (`allow`, `support`, `custom`) so a feature-request framing of the same gap is reachable. This is a **floor, not a ceiling** — it cannot know the issue's error text, and it cannot paraphrase.
 
 **Screen every entry in `.candidates`** and open the promising ones. `lexical_relevance.score` orders your reading; it does not decide anything and does not prove a shared root cause.
+
+**`.must_compare` is mandatory reading.** It holds the highest-scoring candidates, and every issue in it **must be opened and read this run** — not skimmed from its title or `body_excerpt`, which are truncated and routinely hide the sentence that decides the match. Account for **every** number in `.must_compare` in your Duplicate check bullet with a short verdict each: duplicate, possible duplicate, related, or not related, with a few words of reason. A number you never mention reads as a candidate you never opened.
+
+This obligation is about **reading, not deciding**. A high score never justifies a closure on its own, and a candidate you were required to open is very often correctly dismissed — say so explicitly instead of omitting it. Conversely, a duplicate may be an issue that is *not* in `.must_compare`: the list is the mandatory floor, never the full set of things worth comparing.
 
 If the file is missing, unreadable, malformed, fails the `jq -e` check, reports `loaded: false`, `complete: false`, `success: false`, or a non-empty `errors` array, then say in your triage comment that the deterministic duplicate search could not be loaded, run your own searches, and **do not close this issue as a duplicate in this run**.
 
@@ -1309,7 +1324,7 @@ If the issue has already been triaged, do not skip analysis. Publish the current
 
 The bullet points should include:
 
-- **Duplicate check result:** Whether duplicates or similar issues were found, with links to those issues. If closing as duplicate, state this clearly with the link.
+- **Duplicate check result:** Whether duplicates or similar issues were found, with links to those issues. If closing as duplicate, state this clearly with the link. Account for every number in the index's `.must_compare` list here — each one gets a short verdict (duplicate, possible duplicate, related, or not related) with a few words of reason, even when the verdict is "not related". Silence about a mandatory-comparison candidate is read as a candidate you never opened.
 - **Issue type:** State whether you set the issue type to `Bug`, `Feature`, or `Task`, or whether the existing type was already correct.
 - **Labels applied:** List only the labels you **added** in this run, with a brief justification for each (e.g., "Applied `bug` — issue reports a failed `terraform apply`"). **Do NOT list or re-justify labels that were already on the issue.** If you added no new labels, say so in a single short line (do not enumerate the existing labels).
 - **No labels applied:** If no labels could be confidently determined, state this.
@@ -1365,6 +1380,7 @@ When you are **highly confident** an issue is a confirmed duplicate of another (
   - `apply failed` → #101, #145
   - `validation subnet` → #145
   - `address_space error` → no results
+- Candidates requiring explicit comparison: #101, #145
 - Reviewed source: `main.tf`, `variables.tf` in this repository
 - Checked the latest release notes for a prior fix
 
@@ -1378,7 +1394,7 @@ When you are **highly confident** an issue is a confirmed duplicate of another (
 
 > ⚠️ _This triage was generated automatically by an AI agent and may be incomplete or inaccurate._
 
-- **Possible duplicate of #4321** — this appears to describe the same underlying problem, but it also raises a separate question about the expected behavior, so I have left it open for a maintainer to confirm rather than closing it.
+- **Possible duplicate of #4321** — this appears to describe the same underlying problem, but it also raises a separate question about the expected behavior, so I have left it open for a maintainer to confirm rather than closing it. Also compared #4102 — related, but it concerns the subnet delegation path rather than address-prefix validation, so it is a different root cause.
 - **Labels applied:**
   - `bug` — issue reports a failed `terraform apply`
   - `question` — the issue also asks whether the current behavior is intended
@@ -1390,6 +1406,7 @@ When you are **highly confident** an issue is a confirmed duplicate of another (
   - `subnet validation` → #4321
   - `expected behavior` → #4321, #4102
   - `address prefix` → no results
+- Candidates requiring explicit comparison: #4321, #4102
 - Opened and compared #4321 to assess whether it is the same root cause
 
 </details>
@@ -1402,7 +1419,7 @@ When you are **highly confident** an issue is a confirmed duplicate of another (
 
 > ⚠️ _This triage was generated automatically by an AI agent and may be incomplete or inaccurate._
 
-- **Duplicate:** Closing as duplicate of #5678 — both issues report the same Terraform module failure with similar error messages and context.
+- **Duplicate:** Closing as duplicate of #5678 — both issues report the same Terraform module failure with similar error messages and context. Also compared #5012 — same error text, but it was raised against the parent module rather than this one, so it is not related.
 - **Labels applied:**
   - `bug` — issue reports a module error or failed `terraform apply`
   - `duplicate` — if this label exists in the repository label set and the issue is being closed as a duplicate
@@ -1416,6 +1433,7 @@ When you are **highly confident** an issue is a confirmed duplicate of another (
   - `module failure` → #5678, #5012
   - `apply error` → #5678
   - `provider timeout` → no results
+- Candidates requiring explicit comparison: #5678, #5012
 - Compared against #5678 (same error and context); confirmed #5678 is the oldest matching issue
 
 </details>
