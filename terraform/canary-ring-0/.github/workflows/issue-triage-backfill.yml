@@ -23,7 +23,7 @@ on:
       stagger_seconds:
         description: 'Seconds between dispatches. A triage run takes 5-10 minutes.'
         required: false
-        default: '300'
+        default: '180'
         type: string
       dry_run:
         description: 'List the issues that would be triaged without dispatching anything.'
@@ -237,10 +237,16 @@ jobs:
 
           while read -r NUM; do
             # Sleep between dispatches, not after the last one. A triage run takes
-            # 5-10 minutes, so the default 300s keeps roughly two runs overlapping.
-            # That matters because triage issues around a dozen Search API calls
-            # per run against a 30/min budget, and degrades quietly rather than
-            # failing when throttled.
+            # 5-10 minutes, so the default 180s keeps two or three overlapping.
+            #
+            # The binding limit is the GITHUB_TOKEN budget of 1000 requests per
+            # hour, which is shared across concurrent runs in a repository rather
+            # than granted per run. Triage spends roughly 40 requests per issue
+            # before the agent starts, around a dozen of them against the Search
+            # API, so 180s holds the campaign near 800 requests per hour. It
+            # degrades quietly when throttled, recording an incomplete candidate
+            # set and continuing, so going faster buys worse triage rather than a
+            # visible failure.
             if [ "${FIRST}" = "true" ]; then
               FIRST=false
             else
