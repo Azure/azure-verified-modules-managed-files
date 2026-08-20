@@ -28,7 +28,7 @@ Submodules are full AVM modules and need their own `_header.md`, `_footer.md`, a
 - For `ignore_body_changes`, state that paths are body-relative dot notation, ignored configuration is not sent to Azure, and changes take effect only after apply.
 - Ensure provider snippets include `Azure/azapi`. Include `hashicorp/azurerm` only for an exact permitted data-plane/non-ARM operation.
 - In examples, E2E instructions, Terraform tests, fixtures, and setup or teardown snippets, use AzAPI for direct Azure dependencies not supplied by the module under test.
-- For a permitted AzureRM exception, document the exact resource, why no applicable AzAPI resource or action can implement it, the upstream AzAPI issue or pull request, and that the exception must be replaced when support ships.
+- For every permitted `azurerm_*` resource or data-source block, independently document the exact block, the specific unsupported data-plane/non-ARM operation, why no applicable AzAPI resource or action can implement it, the upstream AzAPI issue or pull request, and that the block must be replaced when support ships. One documented block does not authorize another.
 - Preserve legitimate published AVM module source addresses ending in `/azurerm`; that suffix is a legacy Registry namespace, not an AzureRM provider requirement.
 - Prefer working examples over duplicated implementation prose.
 - Keep headings and links stable for Terraform Registry rendering.

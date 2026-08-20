@@ -44,7 +44,7 @@ terraform {
 }
 ```
 
-Apply this `Azure/azapi` requirement to every standalone Terraform root that directly creates, reads, or acts on Azure resources. Supporting resources outside the module under test use AzAPI. `hashicorp/azurerm` and one specific `azurerm_*` resource are permitted only for a data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace the exception when support ships.
+Apply this `Azure/azapi` requirement to every standalone Terraform root that directly creates, reads, or acts on Azure resources. Supporting resources outside the module under test use AzAPI. Each permitted `azurerm_*` resource or data-source block must independently implement one specific unsupported data-plane/non-ARM operation, document the exact block and why AzAPI cannot implement it with an upstream AzAPI issue or pull request, and be replaced when support ships. One valid block does not authorize another.
 
 Do not raise `required_version` only because non-empty `ignore_body_changes` needs Terraform 1.11. Emit `null` when that interface is unused so earlier supported Terraform versions remain compatible.
 

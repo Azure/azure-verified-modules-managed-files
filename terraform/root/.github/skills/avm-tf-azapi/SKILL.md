@@ -30,7 +30,7 @@ terraform {
 
 Every standalone Terraform root that performs a direct Azure operation MUST include `Azure/azapi` in `required_providers`. Use `azapi_resource`, `azapi_data_plane_resource`, `azapi_resource_action`, `azapi_update_resource`, or an AzAPI data source as appropriate. Do not start a new module from an AzureRM implementation and treat migration as future work.
 
-`hashicorp/azurerm ~> 4.0` and one specific `azurerm_*` resource are permitted only for a data-plane or other non-ARM operation that genuinely cannot be implemented with those AzAPI resource forms. Scope the exception to that operation; add the prescribed `provider_azurerm_disallowed` TFLint exclusion; document the exact resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace it when support ships. Do not use this exception for any control-plane resource.
+`hashicorp/azurerm ~> 4.0` is permitted only when required for a data-plane or other non-ARM operation that genuinely cannot be implemented with those AzAPI resource forms. Each `azurerm_*` resource or data-source block independently scopes to one specific unsupported operation, adds the prescribed `provider_azurerm_disallowed` TFLint exclusion, documents the exact block and why AzAPI cannot implement it with an upstream AzAPI issue or pull request, and is replaced when support ships. One valid block does not authorize another. Do not use the exception for any control-plane resource.
 
 ## Complete resource pattern
 

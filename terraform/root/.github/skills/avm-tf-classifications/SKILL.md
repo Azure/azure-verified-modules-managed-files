@@ -7,7 +7,7 @@ description: Use this skill whenever a contributor is deciding what KIND of Azur
 
 Every AVM module is exactly one of three classes. The class drives the naming convention, the repo name, the spec set that applies, and the review process.
 
-Classification does not change the provider rule. Every new resource, pattern, or utility module repository that deploys Azure resources MUST use AzAPI for every control-plane and supported direct Azure operation. AzureRM is permitted only for one exact data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact AzureRM resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace the exception when support ships.
+Classification does not change the provider rule. Every new resource, pattern, or utility module repository that deploys Azure resources MUST use AzAPI for every control-plane and supported direct Azure operation. Each permitted `azurerm_*` resource or data-source block must independently implement one specific unsupported data-plane/non-ARM operation, document the exact block and AzAPI gap with an upstream AzAPI issue or pull request, and be replaced when support ships. One valid block does not authorize another.
 
 Fetch <https://azure.github.io/Azure-Verified-Modules/llms.txt> and confirm the current versions of these sources:
 - <https://raw.githubusercontent.com/Azure/Azure-Verified-Modules/refs/heads/main/docs/content/specs-defs/module-classifications.md>
@@ -124,6 +124,6 @@ When maintaining a pre-existing AzureRM module, keep its existing primary resour
 - **Treating "I want to deploy 5 VMs" as a resource module.** It isn't — RMFR1 requires single-resource. Call a `avm-res-compute-virtualmachine` module 5 times, or write a pattern module if there's reusable orchestration.
 - **Inventing a new naming convention.** The repo name `terraform-azure-avm-...` is mechanical — don't substitute `terraform-azapi-avm-...` "because we're using AzAPI now". The Registry-side convention is fixed.
 - **Treating the Registry namespace as provider selection.** A legacy `/azurerm` Registry source identifies an existing published module; it does not allow a new module to use AzureRM as its primary provider.
-- **Using AzureRM for supporting resources.** Examples, tests, fixtures, and E2E setup use AzAPI for control-plane dependencies even when AzureRM would be easier. AzureRM is limited to the module's exact documented unsupported data-plane/non-ARM operation.
+- **Using AzureRM for supporting resources.** Examples, tests, fixtures, and E2E setup use AzAPI for control-plane dependencies even when AzureRM would be easier. Every AzureRM block must independently satisfy the unsupported data-plane/non-ARM exception.
 - **Adding a primary-resource `name` default.** Resource modules **MUST NOT** default the primary resource's name ([RMNFR2 / SNFR25](https://raw.githubusercontent.com/Azure/Azure-Verified-Modules/refs/heads/main/docs/content/specs-defs/includes/shared/shared/non-functional/SNFR25.md)) — the consumer must always supply it. Defaults *are* permitted (and required) for the standard-interface child resources like `pep-<name>`.
 - **Forgetting that pattern modules consume resource modules.** A pattern that re-implements a Key Vault inline instead of using `avm-res-keyvault-vault` violates TFFR1.

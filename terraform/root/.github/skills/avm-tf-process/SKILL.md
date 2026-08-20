@@ -40,7 +40,7 @@ Build every new resource-deploying module repository on AzAPI. Do not declare or
 
 When supporting configuration needs a direct Azure resource that the module under test does not supply, use an AzAPI resource, data source, or action. Each standalone Terraform root that performs direct Azure operations includes `Azure/azapi` in `required_providers`.
 
-Permit `hashicorp/azurerm ~> 4.0` and one specific `azurerm_*` resource only for a data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Add the prescribed `provider_azurerm_disallowed` TFLint exclusion; document the exact resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace it when support ships. Examples and tests may configure it only to exercise that exact operation.
+Permit `hashicorp/azurerm ~> 4.0` only when required by an independently justified `azurerm_*` resource or data-source block. Each block scopes to one specific unsupported data-plane/non-ARM operation, adds the prescribed `provider_azurerm_disallowed` TFLint exclusion, documents the exact block and why AzAPI cannot implement it with an upstream AzAPI issue or pull request, and is replaced when support ships. One valid block does not authorize another. Examples and tests may configure AzureRM only to exercise such blocks.
 
 Fetch `llms.txt`, then read each applicable raw spec page. At minimum, review:
 

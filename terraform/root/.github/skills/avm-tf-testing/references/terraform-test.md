@@ -85,7 +85,7 @@ mock_provider "random" {}
 
 ### AzureRM exception
 
-Do not add an AzureRM mock to make test scaffolding easier. If a test needs a direct Azure dependency outside the module under test, model it with AzAPI. An AzureRM mock is permitted only when the test exercises the module's exact documented data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact AzureRM resource, the AzAPI gap, and the upstream issue or pull request, and remove the mock when support ships.
+Do not add an AzureRM mock to make test scaffolding easier. If a test needs a direct Azure dependency outside the module under test, model it with AzAPI. An AzureRM mock is permitted only when the test exercises independently justified `azurerm_*` resource or data-source blocks. Each block must implement one specific unsupported data-plane/non-ARM operation, document the exact block and AzAPI gap with an upstream issue or pull request, and be replaced when support ships. One valid block does not authorize another.
 
 ## Integration Test Template
 
@@ -355,7 +355,7 @@ If `tests/unit/setup.ps1` or `tests/integration/setup.ps1` exists, it runs in an
 
 Shell hooks are **not** supported: a `setup.sh` or `teardown.sh` under `tests/<tier>/` fails the run before Terraform is invoked. Port them to PowerShell.
 
-If setup or teardown requires Terraform, use AzAPI for all control-plane and ordinary supporting resources. Configure AzureRM only when setup or teardown must exercise the exact permitted data-plane/non-ARM operation.
+If setup or teardown requires Terraform, use AzAPI for all control-plane and ordinary supporting resources. Configure AzureRM only when setup or teardown must exercise independently justified data-plane/non-ARM exception blocks.
 
 ## Running Tests
 

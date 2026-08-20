@@ -7,7 +7,7 @@ description: Use this skill whenever an Azure Verified Module (AVM) for Terrafor
 
 Every AVM Terraform module that deploys resources collects anonymous deployment/usage telemetry, on by default, with a single opt-out variable. The wiring lives in `main.telemetry.tf` and is maintained by the Mapotf transforms bundled with `Avm.Authoring`.
 
-New resource-deploying module repositories use AzAPI for every control-plane and supported direct Azure operation. AzureRM is permitted only for one exact data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact AzureRM resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace the exception when support ships. Telemetry's AzAPI client and request headers complement that requirement.
+New resource-deploying module repositories use AzAPI for every control-plane and supported direct Azure operation. Each permitted `azurerm_*` resource or data-source block must independently implement one specific unsupported data-plane/non-ARM operation, document the exact block and AzAPI gap with an upstream AzAPI issue or pull request, and be replaced when support ships. One valid block does not authorize another. Telemetry's AzAPI client and request headers complement that requirement.
 
 Fetch <https://azure.github.io/Azure-Verified-Modules/llms.txt> and confirm the current versions of these sources:
 - [SFR3](https://raw.githubusercontent.com/Azure/Azure-Verified-Modules/refs/heads/main/docs/content/specs-defs/includes/shared/shared/functional/SFR3.md) — Deployment/Usage Telemetry

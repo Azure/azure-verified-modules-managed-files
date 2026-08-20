@@ -77,7 +77,7 @@ modules/part/
     integration/
 ```
 
-Additional files use canonical prefixes such as `main.role_assignments.tf`. The submodule declares every provider it consumes in its own `terraform.tf`; AzAPI is required. AzureRM is included only when the submodule owns an exact data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact AzureRM resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace the exception when support ships.
+Additional files use canonical prefixes such as `main.role_assignments.tf`. The submodule declares every provider it consumes in its own `terraform.tf`; AzAPI is required. Each permitted `azurerm_*` resource or data-source block must independently implement one specific unsupported data-plane/non-ARM operation, document the exact block and AzAPI gap with an upstream AzAPI issue or pull request, and be replaced when support ships. One valid block does not authorize another.
 
 ## Parent ID
 
