@@ -30,7 +30,7 @@ Always name the tier when tests are expected. Bare `avm test` validates Terrafor
 
 Place tests in `tests/unit`. Mock every provider declared by the module:
 
-Every new resource-deploying module therefore mocks `azapi`. Mock `azurerm` only when testing an individual, documented TFFR3 exception resource; an AzureRM-only mock set is not valid evidence for a new module.
+Every new resource-deploying module therefore mocks `azapi`. Never declare or mock `azurerm` in tests for a newly authored module.
 
 ```hcl
 mock_provider "azapi" {}
@@ -67,6 +67,8 @@ For detailed `.tftest.hcl` syntax, mocking, assertions, and troubleshooting patt
 
 Place real-Azure Terraform tests in `tests/integration`. Do not mock providers. Keep each run focused, use unique names, and verify behaviors that cannot be proven from a mocked plan.
 
+Test configurations, fixtures, and setup or teardown Terraform MUST NOT declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source. If test scaffolding needs a direct Azure dependency that the module under test does not create, use an AzAPI resource, data source, or action and include `Azure/azapi` in that Terraform root's `required_providers`.
+
 Authenticate without committed secrets. Local runs can use an authenticated Azure CLI session or supported `ARM_*` environment variables. CI uses OIDC with least-privilege identities and protected environments.
 
 ## E2E examples
@@ -87,6 +89,8 @@ Without `--example`, runnable examples execute sequentially. A `.e2eignore` mark
 5. bounded retries for recognized capacity failures.
 
 An idempotency diff is a failure and is never hidden by a retry.
+
+Every runnable example and E2E configuration MUST omit `hashicorp/azurerm` and `azurerm_*`. Direct Azure setup resources use AzAPI, and the example's `required_providers` includes `Azure/azapi`. A legacy `/azurerm` suffix in a published AVM module source is a Registry namespace and is not an AzureRM provider declaration.
 
 For exceptional manual workflows such as distributing examples across subscriptions or retaining deployments for inspection, see the [manual example-testing reference](references/example-test.md).
 

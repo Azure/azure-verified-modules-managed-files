@@ -8,6 +8,12 @@
 
 Use `avm test e2e`, `avm test e2e --list`, or `avm test e2e --example <name>` for normal example validation on every operating system. Each subfolder under `examples/` is a standalone Terraform root module; use the manual workflow below only when the standard runner does not fit the scenario.
 
+## Provider rule
+
+Examples and E2E configurations for a newly authored module MUST NOT declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source. When an example needs a direct Azure setup resource that is not supplied through the module under test, use an AzAPI resource, data source, or action. Its `required_providers` block must include `Azure/azapi` and omit `hashicorp/azurerm`.
+
+A published AVM module source ending in `/azurerm` is a legacy Terraform Registry namespace, not permission to use the AzureRM provider. Preserve a legitimate legacy source address when needed.
+
 ## Testing Workflow
 
 For each example directory, run these steps in order. Stop and fix any errors before proceeding.

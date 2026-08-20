@@ -19,9 +19,13 @@ When a spec ID is mentioned (e.g. `TFFR3`, `RMFR4`, `SNFR1`), fetch `llms.txt` o
 
 ## Terraform Provider Requirement
 
-Every new AVM Terraform module that deploys Azure resources MUST use `Azure/azapi` for its primary resource and primary implementation. AzureRM MUST NOT be selected as a convenience, as an easier schema, or as the module's primary provider.
+Managed authoring for a new AVM Terraform module repository MUST NOT declare or configure `hashicorp/azurerm` and MUST NOT create any `azurerm_*` resource or data source. Use `Azure/azapi` resources, data sources, and actions for every direct Azure operation.
 
-AzureRM is permitted only for an individual resource whose functionality has no equivalent in `azapi_resource`, `azapi_data_plane_resource`, `azapi_resource_action`, or `azapi_update_resource`, and only when every TFFR3 exception requirement is met. A permitted resource-level exception does not make an AzureRM-based module acceptable.
+This prohibition applies everywhere in the repository: the root implementation, submodules, examples, E2E configurations, `.tftest.hcl` files, fixtures, setup or teardown Terraform, migration examples, documentation examples, and generated snippets. Each standalone Terraform root that needs direct Azure resources MUST declare `Azure/azapi` in `required_providers` and MUST omit `hashicorp/azurerm`.
+
+When an example, test, fixture, or E2E setup needs an Azure resource that is not supplied through the module under test, create or read it with `azapi_resource`, `azapi_data_plane_resource`, `azapi_resource_action`, `azapi_update_resource`, or an AzAPI data source as appropriate. Do not use AzureRM as test scaffolding.
+
+The migration skill may inspect an existing AzureRM module and refer to legacy `azurerm_*` state addresses as source input. Generated target implementation, examples, tests, fixtures, setup, and documentation MUST remain AzAPI-only.
 
 ## Module Discovery
 
@@ -37,7 +41,7 @@ AzureRM is permitted only for an individual resource whose functionality has no 
 - Use kebab-case for services and resources
 - Follow Azure service names (e.g., `storage-storageaccount`, `network-virtualnetwork`)
 
-Existing modules can retain legacy `terraform-azurerm-avm-*` repository names and `/azurerm` Registry namespaces. Those names are publication identifiers and do not permit new modules to use AzureRM for their primary implementation.
+Existing modules can retain legacy `terraform-azurerm-avm-*` repository names and `/azurerm` Registry namespaces. Those names are publication identifiers, not provider declarations, and do not permit generated code to use `hashicorp/azurerm` or `azurerm_*`.
 
 ## Module Usage
 

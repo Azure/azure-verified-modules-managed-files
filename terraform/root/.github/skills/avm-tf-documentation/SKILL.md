@@ -7,7 +7,7 @@ description: Use for AVM Terraform generated README content, _header.md, _footer
 
 AVM Terraform `README.md` files are generated. Never edit them directly.
 
-Documentation for every new resource-deploying module MUST describe an AzAPI-based implementation. It must never present AzureRM as the primary provider or a convenience alternative; AzureRM can be documented only for an individual resource that satisfies the complete TFFR3 exception.
+Documentation for every new resource-deploying module MUST describe an AzAPI-only implementation for direct Azure operations. Authored and generated snippets MUST NOT declare or configure `hashicorp/azurerm` or show any `azurerm_*` resource or data source.
 
 ## Source files
 
@@ -26,7 +26,9 @@ Submodules are full AVM modules and need their own `_header.md`, `_footer.md`, a
 - Put interface semantics in variable descriptions so generated input tables stay useful.
 - Document every variable field, especially `resource_types`, `retry`, `timeouts`, and `ignore_body_changes`.
 - For `ignore_body_changes`, state that paths are body-relative dot notation, ignored configuration is not sent to Azure, and changes take effect only after apply.
-- Document any permitted AzureRM exception, including each resource, why AzAPI cannot provide it, and the upstream tracking issue. State that the module remains AzAPI-based; an exception for one resource does not permit an AzureRM primary implementation.
+- Ensure provider snippets include `Azure/azapi` and omit `hashicorp/azurerm`.
+- In examples, E2E instructions, Terraform tests, fixtures, and setup or teardown snippets, use AzAPI for direct Azure dependencies not supplied by the module under test.
+- Preserve legitimate published AVM module source addresses ending in `/azurerm`; that suffix is a legacy Registry namespace, not an AzureRM provider requirement.
 - Prefer working examples over duplicated implementation prose.
 - Keep headings and links stable for Terraform Registry rendering.
 - Do not explain internal review decisions or migration history in the README unless consumers need that information.

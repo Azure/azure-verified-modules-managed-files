@@ -36,7 +36,9 @@ Review synchronized changes before continuing. Do not restore files from the ret
 
 ## 3. Implement from current specifications
 
-Build every new resource-deploying module on AzAPI. The primary resource and primary implementation MUST use AzAPI; AzureRM MUST NOT be chosen for convenience or as an initial implementation to migrate later. A single resource may use AzureRM only when it has no AzAPI equivalent and every TFFR3 exception requirement is met. The module remains AzAPI-based.
+Build every new resource-deploying module repository on AzAPI. Do not declare or configure `hashicorp/azurerm`, and do not create any `azurerm_*` resource or data source in implementation, submodules, examples, E2E configurations, Terraform tests, fixtures, setup or teardown Terraform, migration examples, documentation examples, or generated snippets.
+
+When supporting configuration needs a direct Azure resource that the module under test does not supply, use an AzAPI resource, data source, or action. Each standalone Terraform root that performs direct Azure operations includes `Azure/azapi` in `required_providers` and omits `hashicorp/azurerm`.
 
 Fetch `llms.txt`, then read each applicable raw spec page. At minimum, review:
 
@@ -114,7 +116,7 @@ The pull request must explain:
 - compatibility or breaking-change impact;
 - state migration steps when addresses or providers changed;
 - tests and examples exercised; and
-- any narrow AzureRM exception and upstream tracking issue.
+- confirmation that direct Azure resources in implementation and supporting surfaces are AzAPI-only.
 
 Review the final diff rather than only the hand-authored files. Managed and generated outputs are part of the change.
 

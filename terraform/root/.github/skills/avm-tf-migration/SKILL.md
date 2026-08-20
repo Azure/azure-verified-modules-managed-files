@@ -7,7 +7,9 @@ description: Use for AVM Terraform AzureRM-to-AzAPI migrations, state preservati
 
 An AzureRM-to-AzAPI migration is complete only when the implementation satisfies the current AVM specifications and existing consumers have a documented, tested state path.
 
-Migration guidance applies to existing modules only. Every new resource-deploying module MUST start with AzAPI as its primary implementation; AzureRM is never an acceptable initial or convenience provider.
+Migration guidance applies to existing modules only. AzureRM may be read, analyzed, and referenced as source input being migrated, including legacy `azurerm_*` state addresses. Generated target code MUST NOT declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source.
+
+The target prohibition includes implementation, submodules, upgrade examples, E2E configurations, Terraform tests, fixtures, setup or teardown Terraform, documentation examples, and generated snippets. Supporting Azure resources use AzAPI, and each standalone target Terraform root includes `Azure/azapi` in `required_providers`.
 
 Read TFFR3-TFFR8, TFRMFR1, TFRMNFR1, TFRMNFR2, TFNFR38, and TFNFR39 through <https://azure.github.io/Azure-Verified-Modules/llms.txt> before choosing the migration shape.
 
@@ -100,7 +102,7 @@ The AzAPI target must include:
 - discrete outputs mapped from `azapi_resource.this.output`; and
 - standard interfaces composed through `Azure/avm-utl-interfaces/azure ~> 0.6`.
 
-Do not retain AzureRM as a convenience fallback. TFFR3 permits it only for an individual resource where no AzAPI resource form can provide the functionality, with all prescribed documentation and lint requirements. The target module remains AzAPI-based, and this exception never justifies an AzureRM primary resource or using an AzureRM implementation as the starting point for a new module.
+Do not retain AzureRM as a convenience fallback or copy it into target examples and tests. Existing AzureRM configuration is migration input only; the generated target repository is AzAPI-only for direct Azure operations.
 
 ## Ignore semantics during migration
 
