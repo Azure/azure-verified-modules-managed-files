@@ -9,7 +9,7 @@ Read the current TFFR3-TFFR8, TFNFR38, TFRMFR1, TFRMNFR1, and TFRMNFR2 pages thr
 
 ## Provider requirements
 
-Every new AVM Terraform module repository that deploys Azure resources MUST be built exclusively on AzAPI for direct Azure operations. Do not declare or configure `hashicorp/azurerm`, and do not create any `azurerm_*` resource or data source.
+Every new AVM Terraform module repository that deploys Azure resources MUST use AzAPI for every control-plane resource and every supported direct Azure operation. Do not declare or configure `hashicorp/azurerm`, and do not create any `azurerm_*` resource or data source for convenience or ordinary supporting infrastructure.
 
 This managed-authoring prohibition applies to the root implementation, submodules, examples, E2E configurations, Terraform tests, fixtures, setup or teardown Terraform, migration examples, documentation examples, and generated snippets. When supporting Terraform needs a direct Azure resource that the module under test does not supply, use an AzAPI resource, data source, or action.
 
@@ -28,7 +28,9 @@ terraform {
 
 `~> 2.12` means `>= 2.12, < 3.0`. The 2.12 floor is required for `ignore_body_changes`.
 
-Every standalone Terraform root that performs a direct Azure operation MUST include `Azure/azapi` in `required_providers` and MUST omit `hashicorp/azurerm`. Use `azapi_resource`, `azapi_data_plane_resource`, `azapi_resource_action`, `azapi_update_resource`, or an AzAPI data source as appropriate. Do not start a new module from an AzureRM implementation and treat migration as future work.
+Every standalone Terraform root that performs a direct Azure operation MUST include `Azure/azapi` in `required_providers`. Use `azapi_resource`, `azapi_data_plane_resource`, `azapi_resource_action`, `azapi_update_resource`, or an AzAPI data source as appropriate. Do not start a new module from an AzureRM implementation and treat migration as future work.
+
+`hashicorp/azurerm ~> 4.0` and one specific `azurerm_*` resource are permitted only for a data-plane or other non-ARM operation that genuinely cannot be implemented with those AzAPI resource forms. Scope the exception to that operation; add the prescribed `provider_azurerm_disallowed` TFLint exclusion; document the exact resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace it when support ships. Do not use this exception for any control-plane resource.
 
 ## Complete resource pattern
 
@@ -243,4 +245,4 @@ When moving from AzureRM:
 6. run integration and upgrade-path tests; and
 7. run `avm pre-commit`, commit, then run `avm pr-check` on the clean worktree.
 
-AzureRM code and `azurerm_*` addresses are source input for migration only. Do not carry the AzureRM provider, resources, or data sources into generated target implementation, examples, tests, fixtures, setup or teardown Terraform, or documentation snippets.
+AzureRM code and `azurerm_*` addresses are source input for migration only. Do not carry the AzureRM provider, resources, or data sources into generated target implementation, examples, tests, fixtures, setup or teardown Terraform, or documentation snippets unless the target still requires the documented unsupported data-plane/non-ARM operation.

@@ -7,9 +7,9 @@ description: Use for AVM Terraform AzureRM-to-AzAPI migrations, state preservati
 
 An AzureRM-to-AzAPI migration is complete only when the implementation satisfies the current AVM specifications and existing consumers have a documented, tested state path.
 
-Migration guidance applies to existing modules only. AzureRM may be read, analyzed, and referenced as source input being migrated, including legacy `azurerm_*` state addresses. Generated target code MUST NOT declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source.
+Migration guidance applies to existing modules only. AzureRM may be read, analyzed, and referenced as source input being migrated, including legacy `azurerm_*` state addresses. Generated target code uses AzAPI for every control-plane and supported Azure operation.
 
-The target prohibition includes implementation, submodules, upgrade examples, E2E configurations, Terraform tests, fixtures, setup or teardown Terraform, documentation examples, and generated snippets. Supporting Azure resources use AzAPI, and each standalone target Terraform root includes `Azure/azapi` in `required_providers`.
+The target rule includes implementation, submodules, upgrade examples, E2E configurations, Terraform tests, fixtures, setup or teardown Terraform, documentation examples, and generated snippets. Supporting control-plane resources use AzAPI, and each standalone target Terraform root includes `Azure/azapi` in `required_providers`. Retain AzureRM only for an exact data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact AzureRM resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace the exception when support ships.
 
 Read TFFR3-TFFR8, TFRMFR1, TFRMNFR1, TFRMNFR2, TFNFR38, and TFNFR39 through <https://azure.github.io/Azure-Verified-Modules/llms.txt> before choosing the migration shape.
 
@@ -102,7 +102,7 @@ The AzAPI target must include:
 - discrete outputs mapped from `azapi_resource.this.output`; and
 - standard interfaces composed through `Azure/avm-utl-interfaces/azure ~> 0.6`.
 
-Do not retain AzureRM as a convenience fallback or copy it into target examples and tests. Existing AzureRM configuration is migration input only; the generated target repository is AzAPI-only for direct Azure operations.
+Do not retain AzureRM as a convenience fallback or copy it into target examples and tests. Existing AzureRM configuration is migration input only, except when the target still requires the narrowly documented unsupported data-plane/non-ARM operation.
 
 ## Ignore semantics during migration
 

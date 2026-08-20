@@ -107,7 +107,7 @@ tfpluginschema -n Azure -p azapi --pv 2.12.0 resource schema azapi_resource
 tfpluginschema -n hashicorp -p azurerm --pv "~>4.0" resource list
 ```
 
-Use AzureRM schema inspection only when analyzing an existing module as migration source input. Do not use it to author provider requirements, resources, data sources, examples, tests, fixtures, setup Terraform, or documentation snippets for a new module repository.
+Use AzureRM schema inspection when analyzing an existing module as migration source input or verifying the exact resource for a permitted unsupported data-plane/non-ARM operation. Do not use it to choose AzureRM for convenience or for control-plane and ordinary supporting resources.
 
 ## Output Format
 

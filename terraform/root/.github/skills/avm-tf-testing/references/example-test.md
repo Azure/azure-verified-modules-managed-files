@@ -10,7 +10,9 @@ Use `avm test e2e`, `avm test e2e --list`, or `avm test e2e --example <name>` fo
 
 ## Provider rule
 
-Examples and E2E configurations for a newly authored module MUST NOT declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source. When an example needs a direct Azure setup resource that is not supplied through the module under test, use an AzAPI resource, data source, or action. Its `required_providers` block must include `Azure/azapi` and omit `hashicorp/azurerm`.
+Examples and E2E configurations for a newly authored module use AzAPI for all control-plane and ordinary supporting resources. When an example needs a direct Azure setup resource that is not supplied through the module under test, use an AzAPI resource, data source, or action. Its `required_providers` block must include `Azure/azapi`.
+
+An example may configure or exercise `hashicorp/azurerm` only for the module's exact permitted data-plane/non-ARM operation when no applicable AzAPI resource or action can implement it. Document the exact AzureRM resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request, and replace the exception when support ships.
 
 A published AVM module source ending in `/azurerm` is a legacy Terraform Registry namespace, not permission to use the AzureRM provider. Preserve a legitimate legacy source address when needed.
 

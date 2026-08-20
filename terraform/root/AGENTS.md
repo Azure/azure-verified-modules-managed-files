@@ -19,13 +19,15 @@ When a spec ID is mentioned (e.g. `TFFR3`, `RMFR4`, `SNFR1`), fetch `llms.txt` o
 
 ## Terraform Provider Requirement
 
-Managed authoring for a new AVM Terraform module repository MUST NOT declare or configure `hashicorp/azurerm` and MUST NOT create any `azurerm_*` resource or data source. Use `Azure/azapi` resources, data sources, and actions for every direct Azure operation.
+Managed authoring for a new AVM Terraform module repository MUST use `Azure/azapi` for every control-plane resource and every operation supported by `azapi_data_plane_resource`, `azapi_resource`, `azapi_resource_action`, or `azapi_update_resource`. Do not declare or configure `hashicorp/azurerm`, and do not create any `azurerm_*` resource or data source, for convenience or for ordinary module and supporting infrastructure.
 
-This prohibition applies everywhere in the repository: the root implementation, submodules, examples, E2E configurations, `.tftest.hcl` files, fixtures, setup or teardown Terraform, migration examples, documentation examples, and generated snippets. Each standalone Terraform root that needs direct Azure resources MUST declare `Azure/azapi` in `required_providers` and MUST omit `hashicorp/azurerm`.
+This default prohibition applies everywhere in the repository: the root implementation, submodules, examples, E2E configurations, `.tftest.hcl` files, fixtures, setup or teardown Terraform, migration examples, documentation examples, and generated snippets. Each standalone Terraform root that needs direct Azure resources MUST declare `Azure/azapi` in `required_providers`.
 
 When an example, test, fixture, or E2E setup needs an Azure resource that is not supplied through the module under test, create or read it with `azapi_resource`, `azapi_data_plane_resource`, `azapi_resource_action`, `azapi_update_resource`, or an AzAPI data source as appropriate. Do not use AzureRM as test scaffolding.
 
-The migration skill may inspect an existing AzureRM module and refer to legacy `azurerm_*` state addresses as source input. Generated target implementation, examples, tests, fixtures, setup, and documentation MUST remain AzAPI-only.
+`hashicorp/azurerm ~> 4.0` and one specific `azurerm_*` resource are permitted only for a data-plane or other non-ARM operation that genuinely cannot be implemented with any applicable AzAPI resource or action. Scope the exception to that operation, add the prescribed `provider_azurerm_disallowed` TFLint exclusion, and document the exact AzureRM resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request. Replace the exception when AzAPI support ships. Examples, E2E configurations, and tests may configure or exercise AzureRM only when required by that exact exception; all supporting control-plane resources still use AzAPI.
+
+The migration skill may inspect an existing AzureRM module and refer to legacy `azurerm_*` state addresses as source input. Generated target implementation, examples, tests, fixtures, setup, and documentation follow the same AzAPI-first rule and narrow data-plane/non-ARM exception.
 
 ## Module Discovery
 
@@ -41,7 +43,7 @@ The migration skill may inspect an existing AzureRM module and refer to legacy `
 - Use kebab-case for services and resources
 - Follow Azure service names (e.g., `storage-storageaccount`, `network-virtualnetwork`)
 
-Existing modules can retain legacy `terraform-azurerm-avm-*` repository names and `/azurerm` Registry namespaces. Those names are publication identifiers, not provider declarations, and do not permit generated code to use `hashicorp/azurerm` or `azurerm_*`.
+Existing modules can retain legacy `terraform-azurerm-avm-*` repository names and `/azurerm` Registry namespaces. Those names are publication identifiers, not provider declarations, and do not permit generated code to use `hashicorp/azurerm` or `azurerm_*` outside the narrow unsupported data-plane/non-ARM exception.
 
 ## Module Usage
 

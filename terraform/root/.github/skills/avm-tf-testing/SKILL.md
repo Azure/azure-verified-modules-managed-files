@@ -30,7 +30,7 @@ Always name the tier when tests are expected. Bare `avm test` validates Terrafor
 
 Place tests in `tests/unit`. Mock every provider declared by the module:
 
-Every new resource-deploying module therefore mocks `azapi`. Never declare or mock `azurerm` in tests for a newly authored module.
+Every new resource-deploying module therefore mocks `azapi`. Declare or mock `azurerm` only when a test configures or exercises the module's exact documented unsupported data-plane/non-ARM operation.
 
 ```hcl
 mock_provider "azapi" {}
@@ -67,7 +67,9 @@ For detailed `.tftest.hcl` syntax, mocking, assertions, and troubleshooting patt
 
 Place real-Azure Terraform tests in `tests/integration`. Do not mock providers. Keep each run focused, use unique names, and verify behaviors that cannot be proven from a mocked plan.
 
-Test configurations, fixtures, and setup or teardown Terraform MUST NOT declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source. If test scaffolding needs a direct Azure dependency that the module under test does not create, use an AzAPI resource, data source, or action and include `Azure/azapi` in that Terraform root's `required_providers`.
+Test configurations, fixtures, and setup or teardown Terraform use AzAPI for every control-plane and ordinary supporting resource. If test scaffolding needs a direct Azure dependency that the module under test does not create, use an AzAPI resource, data source, or action and include `Azure/azapi` in that Terraform root's `required_providers`.
+
+AzureRM may be configured or exercised only when required by the exact permitted data-plane/non-ARM operation. The exception documentation must name the AzureRM resource, explain why no applicable AzAPI resource or action can implement it, link the upstream AzAPI issue or pull request, and require replacement when support ships.
 
 Authenticate without committed secrets. Local runs can use an authenticated Azure CLI session or supported `ARM_*` environment variables. CI uses OIDC with least-privilege identities and protected environments.
 
@@ -90,7 +92,7 @@ Without `--example`, runnable examples execute sequentially. A `.e2eignore` mark
 
 An idempotency diff is a failure and is never hidden by a retry.
 
-Every runnable example and E2E configuration MUST omit `hashicorp/azurerm` and `azurerm_*`. Direct Azure setup resources use AzAPI, and the example's `required_providers` includes `Azure/azapi`. A legacy `/azurerm` suffix in a published AVM module source is a Registry namespace and is not an AzureRM provider declaration.
+Every runnable example and E2E configuration uses AzAPI for direct Azure setup and control-plane resources, and its `required_providers` includes `Azure/azapi`. It may include AzureRM only to configure or exercise the exact documented unsupported data-plane/non-ARM operation. A legacy `/azurerm` suffix in a published AVM module source is a Registry namespace and is not an AzureRM provider declaration.
 
 For exceptional manual workflows such as distributing examples across subscriptions or retaining deployments for inspection, see the [manual example-testing reference](references/example-test.md).
 

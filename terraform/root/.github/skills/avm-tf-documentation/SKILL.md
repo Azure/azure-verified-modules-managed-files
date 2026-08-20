@@ -7,7 +7,7 @@ description: Use for AVM Terraform generated README content, _header.md, _footer
 
 AVM Terraform `README.md` files are generated. Never edit them directly.
 
-Documentation for every new resource-deploying module MUST describe an AzAPI-only implementation for direct Azure operations. Authored and generated snippets MUST NOT declare or configure `hashicorp/azurerm` or show any `azurerm_*` resource or data source.
+Documentation for every new resource-deploying module MUST describe an AzAPI-first implementation. Authored and generated snippets use AzAPI for all control-plane and ordinary supporting resources and MUST NOT present AzureRM as a convenience alternative.
 
 ## Source files
 
@@ -26,8 +26,9 @@ Submodules are full AVM modules and need their own `_header.md`, `_footer.md`, a
 - Put interface semantics in variable descriptions so generated input tables stay useful.
 - Document every variable field, especially `resource_types`, `retry`, `timeouts`, and `ignore_body_changes`.
 - For `ignore_body_changes`, state that paths are body-relative dot notation, ignored configuration is not sent to Azure, and changes take effect only after apply.
-- Ensure provider snippets include `Azure/azapi` and omit `hashicorp/azurerm`.
+- Ensure provider snippets include `Azure/azapi`. Include `hashicorp/azurerm` only for an exact permitted data-plane/non-ARM operation.
 - In examples, E2E instructions, Terraform tests, fixtures, and setup or teardown snippets, use AzAPI for direct Azure dependencies not supplied by the module under test.
+- For a permitted AzureRM exception, document the exact resource, why no applicable AzAPI resource or action can implement it, the upstream AzAPI issue or pull request, and that the exception must be replaced when support ships.
 - Preserve legitimate published AVM module source addresses ending in `/azurerm`; that suffix is a legacy Registry namespace, not an AzureRM provider requirement.
 - Prefer working examples over duplicated implementation prose.
 - Keep headings and links stable for Terraform Registry rendering.

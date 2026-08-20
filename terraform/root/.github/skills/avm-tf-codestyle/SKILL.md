@@ -27,7 +27,7 @@ Each module and submodule also includes `_header.md` and `_footer.md`; `README.m
 
 ## Provider requirements
 
-Every new module repository that deploys Azure resources MUST use AzAPI for every direct Azure operation. Do not declare or configure `hashicorp/azurerm`, and do not create any `azurerm_*` resource or data source in implementation, submodules, examples, E2E configurations, Terraform tests, fixtures, setup or teardown Terraform, migration examples, documentation examples, or generated snippets.
+Every new module repository that deploys Azure resources MUST use AzAPI for every control-plane and supported direct Azure operation. Do not declare or configure `hashicorp/azurerm`, and do not create any `azurerm_*` resource or data source for convenience or ordinary supporting infrastructure in implementation, submodules, examples, E2E configurations, Terraform tests, fixtures, setup or teardown Terraform, migration examples, documentation examples, or generated snippets.
 
 TFNFR25 requires a minimum and maximum Terraform CLI constraint, while TFFR3 requires the AzAPI provider range. Use the governance-managed baseline; a compliant current shape is:
 
@@ -44,7 +44,7 @@ terraform {
 }
 ```
 
-Apply this `Azure/azapi` requirement to every standalone Terraform root that directly creates, reads, or acts on Azure resources. Omit `hashicorp/azurerm` from `required_providers`; supporting resources outside the module under test use AzAPI.
+Apply this `Azure/azapi` requirement to every standalone Terraform root that directly creates, reads, or acts on Azure resources. Supporting resources outside the module under test use AzAPI. `hashicorp/azurerm` and one specific `azurerm_*` resource are permitted only for a data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace the exception when support ships.
 
 Do not raise `required_version` only because non-empty `ignore_body_changes` needs Terraform 1.11. Emit `null` when that interface is unused so earlier supported Terraform versions remain compatible.
 

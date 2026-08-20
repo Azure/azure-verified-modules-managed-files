@@ -31,7 +31,7 @@ The proposal **MUST** include:
 - module description
 - module owner(s), if known (must be a Microsoft FTE — see `avm-tf-process`)
 
-Lifecycle approval does not relax the managed authoring rule: a new resource-deploying module repository must be AzAPI-only for direct Azure operations. It must not declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source in implementation, examples, tests, fixtures, setup Terraform, or generated documentation.
+Lifecycle approval does not relax the managed authoring rule: a new resource-deploying module repository uses AzAPI for every control-plane and supported direct Azure operation. AzureRM is permitted only for one exact data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact AzureRM resource, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request; replace the exception when support ships.
 
 The AVM core team reviews the proposal. If accepted → Available. If rejected → the issue is closed and the lifecycle ends.
 

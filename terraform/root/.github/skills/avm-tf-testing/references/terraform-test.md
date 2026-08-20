@@ -19,7 +19,7 @@ Tests MUST live in one of two directories. No other location is permitted.
 
 Submodules under `./modules/` follow the same pattern — each can have its own `tests/unit/` and `tests/integration/` directories.
 
-All test files, fixtures, and setup or teardown Terraform for a newly authored module MUST NOT declare or configure `hashicorp/azurerm` or create any `azurerm_*` resource or data source. Direct Azure scaffolding uses an AzAPI resource, data source, or action, and each standalone Terraform root includes `Azure/azapi` in `required_providers`.
+All test files, fixtures, and setup or teardown Terraform for a newly authored module use AzAPI for control-plane and ordinary supporting resources. Direct Azure scaffolding uses an AzAPI resource, data source, or action, and each standalone Terraform root includes `Azure/azapi` in `required_providers`.
 
 ## Unit Tests vs Integration Tests
 
@@ -83,9 +83,9 @@ mock_provider "modtm" {}
 mock_provider "random" {}
 ```
 
-### Provider prohibition
+### AzureRM exception
 
-Do not add an AzureRM mock to make test scaffolding easier. If a test needs a direct Azure dependency outside the module under test, model it with AzAPI. AzureRM may appear only as source input while migrating an existing module, never in newly generated target tests or fixtures.
+Do not add an AzureRM mock to make test scaffolding easier. If a test needs a direct Azure dependency outside the module under test, model it with AzAPI. An AzureRM mock is permitted only when the test exercises the module's exact documented data-plane/non-ARM operation that no applicable AzAPI resource or action can implement. Document the exact AzureRM resource, the AzAPI gap, and the upstream issue or pull request, and remove the mock when support ships.
 
 ## Integration Test Template
 
@@ -355,7 +355,7 @@ If `tests/unit/setup.ps1` or `tests/integration/setup.ps1` exists, it runs in an
 
 Shell hooks are **not** supported: a `setup.sh` or `teardown.sh` under `tests/<tier>/` fails the run before Terraform is invoked. Port them to PowerShell.
 
-If setup or teardown requires Terraform, keep it AzAPI-only. Do not generate AzureRM provider configuration, resources, or data sources in setup directories or fixtures.
+If setup or teardown requires Terraform, use AzAPI for all control-plane and ordinary supporting resources. Configure AzureRM only when setup or teardown must exercise the exact permitted data-plane/non-ARM operation.
 
 ## Running Tests
 
