@@ -107,6 +107,24 @@ steps:
     ISSUE_NUMBER: ${{ github.event.inputs.issue_number || github.event.issue.number }}
   run: |
     echo "${ISSUE_NUMBER}" > /tmp/gh-aw/agent/issue-number.txt
+- name: Fetch current issue type
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
+    ISSUE_NUMBER: ${{ github.event.inputs.issue_number || github.event.issue.number }}
+  run: |
+    set -o pipefail
+    TYPE_FILE=/tmp/gh-aw/agent/issue-type.txt
+    RAW=$(mktemp)
+    # The agent's issue-reading tool does not return the native issue type, and
+    # the `Type: …` labels and the template's "### Issue Type?" field are not it.
+    if gh api "repos/${GH_AW_GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" \
+      --jq '.type.name // "NONE"' > "${RAW}"; then
+      tr -d '\r' < "${RAW}" | head -n 1 > "${TYPE_FILE}"
+    else
+      echo "UNKNOWN" > "${TYPE_FILE}"
+    fi
+    rm -f "${RAW}"
 - name: Fetch issue close and reopen history
   env:
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1102,7 +1120,20 @@ Classify every issue as exactly one of these GitHub issue types and use the `set
 - **Feature** — Feature requests for new user-facing capabilities, resources, variables, outputs, integrations, or enhancements to existing behavior.
 - **Task** — Concrete maintenance, documentation, testing, CI, refactoring, investigation, or other actionable work that is neither a defect nor a feature request.
 
-Choose the single best fit from the issue's primary intent. Do not create or use any other issue type. If the issue already has the correct type, leave it unchanged. Issue types are independent of labels, so continue with label analysis after setting the type.
+Choose the single best fit from the issue's primary intent. Do not create or use any other issue type.
+
+The issue's **current** native type is in `/tmp/gh-aw/agent/issue-type.txt` — one line, either `Bug`, `Feature`, `Task`, `NONE` (no type set), or `UNKNOWN` (lookup failed). Read that file; it is the only trustworthy source. Your issue-reading tool does not return the native type at all, so you cannot see it any other way.
+
+Two things look like the type and are not it. Neither one may be used to conclude a type is already set:
+
+- the `Type: …` **labels** (`Type: Bug :bug:`, `Type: Feature Request :heavy_plus_sign:`, …) — these are labels, a separate system;
+- the **`### Issue Type?`** field in the issue body — that is free text the reporter picked in the issue form.
+
+An issue can carry `Type: Bug :bug:` and a body saying `Bug` while its native type is `NONE`. That is the normal state of any issue triaged before issue types existed.
+
+So: emit `set-issue-type` whenever the file does **not** already contain your chosen type — including when it contains `NONE` or `UNKNOWN`. Only skip it when the file already holds exactly the type you would set.
+
+Issue types are independent of labels, so continue with label analysis after setting the type.
 
 Analyse the issue content and attach the most appropriate labels from the repository's existing label set. Apply **all** labels that are relevant.
 
@@ -1314,7 +1345,7 @@ If the issue has already been triaged, do not skip analysis. Publish the current
 The bullet points should include:
 
 - **Duplicate check result:** Whether duplicates or similar issues were found, with links to those issues. If closing as duplicate, state this clearly with the link. Account for every number in the index's `.must_compare` list here — each one gets a short verdict (duplicate, possible duplicate, related, or not related) with a few words of reason, even when the verdict is "not related". Silence about a mandatory-comparison candidate is read as a candidate you never opened.
-- **Issue type:** State whether you set the issue type to `Bug`, `Feature`, or `Task`, or whether the existing type was already correct.
+- **Issue type:** State the type you set, or that the type in `/tmp/gh-aw/agent/issue-type.txt` already matched. Base this only on that file — never claim a type "was already set" from a `Type: …` label or the body's `### Issue Type?` field.
 - **Labels applied:** List only the labels you **added** in this run, with a brief justification for each (e.g., "Applied `bug` — issue reports a failed `terraform apply`"). **Do NOT list or re-justify labels that were already on the issue.** If you added no new labels, say so in a single short line (do not enumerate the existing labels).
 - **No labels applied:** If no labels could be confidently determined, state this.
 - **Labels skipped:** If label definitions could not be loaded, state "Labels could not be applied due to a data loading error."
@@ -1451,7 +1482,7 @@ Every issue safe output carries it, in every combination — never only the firs
 - If you **close the issue** because it is conclusively fixed: Use `add-comment` for the triage summary **first**, then use `close-issue` with `state_reason: completed` and a body naming the fixing PR. Do not set `duplicate_of` on this path.
 - If the **Human Reopen Override** is active: Never use `close-issue`, regardless of duplicate or fix confidence. Continue with any non-closing outputs and explain the veto in the triage comment.
 - If you find an unlinked **confirmed-fix PR**: Use `update-pull-request` with `pull_request_number`, `operation: append`, and a body of exactly `Fixes #<issue-number>`. Do not update likely or merely related candidates.
-- Use `set-issue-type` with `issue_number` and exactly one of `Bug`, `Feature`, or `Task` when the issue's current type does not match its primary intent.
+- Use `set-issue-type` with `issue_number` and exactly one of `Bug`, `Feature`, or `Task` unless `/tmp/gh-aw/agent/issue-type.txt` already holds that exact type. A file reading `NONE` or `UNKNOWN` means you must emit it.
 - If you find a **possible duplicate** but are **not highly confident** it is the same root cause: do **NOT** use `close-issue`. Use `add-comment` to flag `Possible duplicate of #N` (with the link) and leave the issue open; apply labels with `add-labels` as usual (but not `duplicate`). Reserve `close-issue` for confirmed duplicates only.
 - If you **add labels AND post a comment** (most common case): Call **both** `add-labels` (to apply labels to the issue) AND `add-comment` (for the triage summary), and put `item_number` on **both** — the observed failure mode is a run that attaches the number to the comment and omits it from the labels, which loses the labels while the comment still publishes. ⚠️ Listing label names inside the comment body does NOT apply them — you MUST call `add-labels` as a separate action.
 - If you **only post a comment** (no labels to add, no close): Use `add-comment`.
