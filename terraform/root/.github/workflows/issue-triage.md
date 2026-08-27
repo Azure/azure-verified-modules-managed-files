@@ -29,6 +29,7 @@ network:
 # conclusion jobs and their failure reports. Discriminating by issue number
 # gives each dispatched run its own group. Stripped from the compiled lock.
 concurrency:
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.inputs.issue_number || github.event.issue.number || github.run_id }}"
   job-discriminator: ${{ github.event.inputs.issue_number || github.event.issue.number || github.run_id }}
 # Read-only permissions for triage
 permissions:
