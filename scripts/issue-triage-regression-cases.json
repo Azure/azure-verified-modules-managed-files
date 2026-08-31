@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "repository": "Azure/terraform-azurerm-avm-ptn-example-repo",
+  "cases": [
+    {
+      "id": "fix-released",
+      "path": "Fix is confirmed and released, so the issue is closed as completed",
+      "issue": 263,
+      "setup": "resource_types was added by PR #227. The v0.1.2 tag object and #227's merge commit are the same SHA, so #227 is absent from unreleased_pr_numbers.",
+      "expectState": "closed",
+      "expectReason": "completed",
+      "expectOutput": "close_issue",
+      "expectAbsentLabel": "Awaiting Release To Be Cut",
+      "notes": "v1.0.27 got this path wrong once, labelling an issue as awaiting a release that already existed. Merge and release timestamps mislead here: #227 merged 33 seconds before v0.1.2 was published, from that very commit. Staged fresh rather than reusing #260, because #260 has since been closed by the agent and reopening it would create the reopen history that vetoes closure independently."
+    },
+    {
+      "id": "fix-unreleased",
+      "path": "Fix is merged but unreleased, so the issue stays open and is labelled",
+      "issue": 262,
+      "setup": "The interfaces-utility refactor was done by PR #238, which IS in unreleased_pr_numbers.",
+      "expectState": "open",
+      "expectLabel": "Awaiting Release To Be Cut",
+      "expectAbsentOutput": "close_issue",
+      "notes": "Tied to a different PR than fix-released, and to a subject no other issue covers, so neither a duplicate closure nor reopen history can pre-empt the release check."
+    },
+    {
+      "id": "reopen-override",
+      "path": "A human reopened an agent closure, so the agent never closes it again",
+      "issue": 233,
+      "setup": "The agent closed it and a human reopened it. Its fix, PR #229, is also unreleased.",
+      "expectState": "open",
+      "expectOutput": "add_comment",
+      "expectAbsentOutput": "close_issue",
+      "notes": "Two independent reasons not to close, so passing here says nothing about the release gate on its own. That is why fix-unreleased is staged separately."
+    },
+    {
+      "id": "question-type",
+      "path": "A usage question gets the Task issue type",
+      "issue": 125,
+      "setup": "A how-do-I question about attaching a custom NSG per subnet.",
+      "expectState": "open",
+      "expectType": "Task",
+      "expectOutput": "set_issue_type",
+      "expectAbsentOutput": "close_issue",
+      "notes": "Emitting Question fails the whole run. Shipped in v1.0.25 and untested until this suite existed."
+    },
+    {
+      "id": "no-fix-open",
+      "path": "No fix exists, so the issue gets a type and labels and stays open",
+      "issue": 249,
+      "setup": "Module-level tags are not propagated to subnets, and nothing on main addresses it.",
+      "expectState": "open",
+      "expectType": "Bug",
+      "expectOutput": "set_issue_type",
+      "expectAbsentOutput": "close_issue",
+      "notes": "The everyday path. It must never regress into closing something."
+    },
+    {
+      "id": "needs-evidence",
+      "path": "A vague report gets a request for evidence and no other action",
+      "issue": 129,
+      "setup": "Issue body amounts to \"the module does not work\", with no reproduction.",
+      "expectState": "open",
+      "expectOutput": "add_comment",
+      "expectAbsentOutput": "close_issue",
+      "notes": "Guards the opposite failure from fix-released: acting confidently on nothing."
+    }
+  ]
+}
