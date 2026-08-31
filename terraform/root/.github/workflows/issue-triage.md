@@ -1356,14 +1356,18 @@ Do not judge release state from a PR body, a changelog, an earlier comment, or t
 | `loaded` | `false` means the lookup failed — treat every fix as unreleased |
 | `has_release` | `false` means the module has never been released |
 | `latest_tag` / `latest_published_at` | the newest release |
-| `unreleased_shas` | merge commits on the default branch that no release contains |
-| `unreleased_pr_numbers` | the PR numbers those commits reference |
+| `unreleased_pr_numbers` | **the deciding list** — PR numbers merged to the default branch that no release contains |
+| `unreleased_shas` | the commits behind those PR numbers, for reference only |
+
+**Decide from `unreleased_pr_numbers`, never from `unreleased_shas`.** A commit SHA carries no clue about what it changed, so picking one from the list and asserting it introduced the feature is a guess wearing the costume of evidence. Two runs did exactly that, both citing `262cb246` — a `chore: run avm pre-commit` commit touching only workflow files — as the origin of a variable it never touched. A PR number can be checked: you can read PR #229 and see whether it added the thing.
 
 **Run this exact test on your fixing PR, and do not substitute judgement for it:**
 
 > Is the fixing PR's number in `unreleased_pr_numbers`?
 > **Yes → not released.** Apply `Status: Awaiting Release To Be Cut` and leave the issue open.
 > **No → released.** Close as `completed`.
+
+Identify the fixing PR before you run the test, and identify it from its contents. Find the PR whose diff actually adds the behaviour the issue asks for. Do not work backwards from `unreleased_pr_numbers` by asking which of those PRs might plausibly be responsible — the fixing PR is frequently not in that list, because a released fix by definition is not.
 
 There is no third answer, and nothing else is evidence. **Merge and release dates in particular are not evidence.** A PR merged seconds before a release is in that release; a PR merged months ago may still be unreleased. `avm-ptn-example-repo` PR #227 merged at `21:30:59` and `v0.1.2` was published at `21:31:32` — 33 seconds later, from that very commit. Reasoning from the timestamps would call it unreleased; the list correctly does not contain it.
 
