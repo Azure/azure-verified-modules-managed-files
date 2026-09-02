@@ -14,13 +14,13 @@ AVM has three module classifications:
 - **Pattern modules** - opinionated multi-resource solutions composed from resource modules.
 - **Utility modules** - shared logic or interfaces that do not directly deploy an Azure resource.
 
-Read [`AGENTS.md`](../AGENTS.md) for the repository-wide Terraform requirements and use the [AVM Terraform agent](agents/avm-tf.agent.md) for specification-driven module development.
+Use the [AVM Terraform agent](agents/avm-tf.agent.md) for specification-driven module development. `AGENTS.md` is a compatibility entry point for agents that do not load this Copilot-specific file directly.
 
 ## Critical Compliance Requirements
 
 ### Instruction acknowledgement
 
-After reading `AGENTS.md` and the relevant skills, but before modifying files, output this block visibly to the user:
+After reading these instructions and the relevant skills, but before modifying files, output this block visibly to the user:
 
 ```json
 {
