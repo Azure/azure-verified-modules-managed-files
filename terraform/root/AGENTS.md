@@ -1,6 +1,6 @@
 ---
 description: " Azure Verified Modules (AVM) and Terraform"
-applyTo: "**/*.terraform, **/*.tf, **/*.tfvars, **/*.tfstate, **/*.tflint.hcl, **/*.tf.json, **/*.tfvars.json"
+applyTo: "**/*.terraform, **/*.tf, **/*.tfvars, **/*.tfstate, **/*.hcl, **/*.rego, **/*.tf.json, **/*.tfvars.json"
 ---
 
 # Azure Verified Modules (AVM) Terraform
@@ -25,7 +25,7 @@ This default prohibition applies everywhere in the repository: the root implemen
 
 When an example, test, fixture, or E2E setup needs an Azure resource that is not supplied through the module under test, create or read it with `azapi_resource`, `azapi_data_plane_resource`, `azapi_resource_action`, `azapi_update_resource`, or an AzAPI data source as appropriate. Do not use AzureRM as test scaffolding.
 
-`hashicorp/azurerm ~> 4.0` is permitted only when required for a data-plane or other non-ARM operation that genuinely cannot be implemented with any applicable AzAPI resource or action. Each `azurerm_*` resource or data-source block MUST independently satisfy the exception: scope the block to one specific unsupported operation, add the prescribed `avm_provider_azurerm_disallowed` rule override to the narrowest supported TFLint override file, and document the exact block, why AzAPI cannot implement it, and the upstream AzAPI issue or pull request. Replace each block when AzAPI support ships. One valid block does not authorize any other AzureRM use. Examples, E2E configurations, and tests may configure or exercise AzureRM only when required by their independently justified exception blocks; all supporting control-plane resources still use AzAPI. Never suppress TFLint rules with inline comments; follow the `avm-tf-tflint` skill and the [AVM override process](https://azure.github.io/Azure-Verified-Modules/contributing/terraform/tflint-rules/#tflint-configuration-overrides).
+`hashicorp/azurerm ~> 4.0` is permitted only when required for a data-plane or other non-ARM operation that genuinely cannot be implemented with any applicable AzAPI resource or action. Each `azurerm_*` resource or data-source block MUST independently satisfy the exception: scope the block to one specific unsupported operation, document the exact block, explain why AzAPI cannot implement it, and link the upstream AzAPI issue or pull request. Replace each block when AzAPI support ships. One valid block does not authorize any other AzureRM use. Examples, E2E configurations, and tests may configure or exercise AzureRM only when required by their independently justified exception blocks; all supporting control-plane resources still use AzAPI. Prefer the [AVM TFLint override files](https://azure.github.io/Azure-Verified-Modules/contributing/terraform/tflint-rules/#tflint-configuration-overrides), but use a justified line-level annotation when it preserves enforcement for unrelated findings better than a scope-wide override. Follow `avm-tf-tflint`.
 
 The migration skill may inspect an existing AzureRM module and refer to legacy `azurerm_*` state addresses as source input. Generated target implementation, examples, tests, fixtures, setup, and documentation follow the same AzAPI-first rule and narrow data-plane/non-ARM exception.
 
@@ -47,13 +47,14 @@ Existing modules can retain legacy `terraform-azurerm-avm-*` repository names an
 
 ## Skills
 
-When a task falls within a skill's domain, read and follow the complete skill before changing files. For TFLint findings, rule configuration, exclusions, or severity changes, always load `avm-tf-tflint`.
+When a task falls within a skill's domain, read and follow the complete skill before changing files.
 
 | Skill | Use for | File |
 | --- | --- | --- |
 | `avm-tf-azapi` | AzAPI resources, ARM schemas, provider constraints, retries, timeouts, response exports, replacement triggers, and `ignore_body_changes`. | `.github/skills/avm-tf-azapi/SKILL.md` |
 | `avm-tf-classifications` | Resource, pattern, and utility module classification and naming. | `.github/skills/avm-tf-classifications/SKILL.md` |
 | `avm-tf-codestyle` | Terraform file layout, HCL style, variables, outputs, validation, and lifecycle syntax. | `.github/skills/avm-tf-codestyle/SKILL.md` |
+| `avm-tf-conftest` | Conftest policy findings, APRL and AVMSEC rule identifiers, and example-local Rego exceptions. | `.github/skills/avm-tf-conftest/SKILL.md` |
 | `avm-tf-documentation` | Generated README inputs, examples, and documentation validation. | `.github/skills/avm-tf-documentation/SKILL.md` |
 | `avm-tf-interfaces` | Standard AVM interfaces and utility-module composition. | `.github/skills/avm-tf-interfaces/SKILL.md` |
 | `avm-tf-lifecycle` | Module proposal, ownership, lifecycle, versioning, and deprecation. | `.github/skills/avm-tf-lifecycle/SKILL.md` |

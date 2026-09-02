@@ -30,17 +30,27 @@ If the version gate reports a stale installation, run `avm update`, re-import th
 
 Do not approximate the managed configuration with a separately installed TFLint binary, custom plugin setup, Make, Porch, or a container.
 
-## Never use inline suppressions
+## Prefer configuration overrides
 
-Do not add or recommend inline TFLint suppression directives. This prohibition applies to AVM and standard Terraform TFLint rules. Inline comments hide exceptions in implementation files and bypass the reviewable `Avm.Authoring` configuration process. Put every permitted rule change in the narrowest supported override file and explain it there.
+Use the supported AVM override files by default. They make exceptions visible, reviewable, and consistent across the intended root, submodule, or example scope.
+
+Use a line-level TFLint annotation when a single finding is exceptional and disabling the rule for the full supported configuration scope would hide unrelated findings. TFLint annotations can suppress issues only in valid, parseable Terraform and only when the rule permits annotations. Read the current [TFLint annotation documentation](https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/annotations.md) before using one.
+
+```hcl
+# This declaration is consumed after the managed transform runs.
+# tflint-ignore: terraform_unused_declarations
+avm_azapi_header = join(" ", [for k, v in local.avm_azapi_headers : "${k}=${v}"])
+```
+
+Name only the specific rule and explain the reason. Do not use `all`. Avoid file-level annotations unless the entire file genuinely needs the same exception.
 
 ## Override only after investigating
 
 1. Read the rule guidance and its linked AVM specification.
 2. Confirm the rule applies to the failing root, submodule, or example.
 3. Prefer a compliant code change.
-4. If an exception is justified, choose the narrowest supported override file.
-5. Add a comment immediately above the rule block explaining why the exception is valid, its exact scope, and any issue or pull request that will remove it.
+4. If an exception is justified, decide whether a line-level annotation preserves more coverage than the narrowest supported override file.
+5. Explain why the exception is valid, its exact scope, and any issue or pull request that will remove it.
 6. Re-run `avm lint` and inspect the merged-scope result.
 
 Never disable a rule merely to make CI pass. Keep exceptions temporary where possible. A scope-wide override does not authorize unrelated violations in that scope; manually review the scope for any additional occurrences.
@@ -78,7 +88,7 @@ rule "avm_interface_lock_deprecated" {
 
 Per-rule severity changes are separate from TFLint's global `--minimum-failure-severity` process threshold.
 
-For a narrowly approved AzureRM exception, override `avm_provider_azurerm_disallowed` in the narrowest supported scope and list every permitted `azurerm_*` block in the justification comments with the AzAPI gap and upstream issue or pull request. Because the rule configuration applies to the whole selected scope, manually verify that no other AzureRM declarations or usages exist there.
+For a narrowly approved AzureRM exception, prefer an override of `avm_provider_azurerm_disallowed` in the narrowest supported scope and list every permitted `azurerm_*` block in the justification comments with the AzAPI gap and upstream issue or pull request. If the scope contains other AzureRM checks that must remain enforced, use a justified line-level annotation for the exceptional finding instead. Manually verify that no undocumented AzureRM declarations or usages exist.
 
 ## Canonical rule names
 

@@ -80,11 +80,10 @@ locals {
     avm_module_version = one(data.modtm_module_source.telemetry).module_version
   })
 
+  # tflint-ignore: terraform_unused_declarations
   avm_azapi_header = join(" ", [for k, v in local.avm_azapi_headers : "${k}=${v}"])
 }
 ```
-
-Do not add an inline TFLint suppression to this managed declaration. Run `avm pre-commit` before linting so transforms wire the header into applicable AzAPI resources. If a genuine exception remains, use the configuration-file process in `avm-tf-tflint`.
 
 ### The moving parts
 
