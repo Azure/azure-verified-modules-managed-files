@@ -11,8 +11,6 @@ Before working on Terraform in this repository:
 3. Read the complete skill matching the task before analyzing or changing files.
 4. Use the [AVM Terraform agent](agents/avm-tf.agent.md) for specification-driven module development.
 
-For TFLint findings, rule configuration, exclusions, severity changes, or override files, always read `avm-tf-tflint`. Never suppress TFLint rules with inline comments.
-
 ## Skills
 
 | Skill | Use for | File |
