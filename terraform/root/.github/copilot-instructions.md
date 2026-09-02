@@ -18,6 +18,19 @@ Read [`AGENTS.md`](../AGENTS.md) for the repository-wide Terraform requirements 
 
 ## Critical Compliance Requirements
 
+### Instruction acknowledgement
+
+After reading `AGENTS.md` and the relevant skills, but before modifying files, output this block visibly to the user:
+
+```json
+{
+  "avm-terraform-instructions": "loaded",
+  "skills": ["<loaded-skill-name>"]
+}
+```
+
+List every skill loaded for the task. Use an empty `skills` array when no specialized skill applies.
+
 ### Follow current AVM specifications
 
 Before reviewing or generating Terraform:
