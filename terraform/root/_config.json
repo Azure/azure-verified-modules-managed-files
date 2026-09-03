@@ -22,7 +22,6 @@
     ".github/actions/e2e-getexamples/action.yml",
     ".github/actions/linting/action.yml",
     ".github/actions/version-check/action.yml",
-    ".github/copilot-instructions.md",
     ".github/policies/avmrequiredfiles.yml",
     ".github/policies/branch-protection.yml",
     ".github/workflows/e2e.yml",
