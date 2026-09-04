@@ -146,7 +146,7 @@ steps:
     # to be wrong in — it would label an issue as awaiting a release that exists.
     LATEST=$(mktemp)
     if ! gh api --paginate "repos/${GH_AW_GITHUB_REPOSITORY}/releases?per_page=100" > "${LATEST}" 2>/dev/null; then
-      printf '%s\n' '{"loaded":false,"has_release":null,"latest_tag":null,"latest_published_at":null,"ahead_by":0,"unreleased_shas":[],"unreleased_pr_numbers":[]}' > "${OUT}"
+      printf '%s\n' '{"loaded":false,"has_release":null,"latest_tag":null,"latest_published_at":null,"ahead_by":0,"unreleased_pr_numbers":[]}' > "${OUT}"
       rm -f "${LATEST}"
       exit 0
     fi
@@ -162,19 +162,24 @@ steps:
     PUB=${NEWEST#*$'\t'}
     if [ "${PUB}" = "${TAG}" ]; then PUB=""; fi
     if [ -z "${TAG}" ]; then
-      printf '%s\n' '{"loaded":true,"has_release":false,"latest_tag":null,"latest_published_at":null,"ahead_by":0,"unreleased_shas":[],"unreleased_pr_numbers":[]}' > "${OUT}"
+      printf '%s\n' '{"loaded":true,"has_release":false,"latest_tag":null,"latest_published_at":null,"ahead_by":0,"unreleased_pr_numbers":[]}' > "${OUT}"
       exit 0
     fi
     CMP=$(mktemp)
     if gh api "repos/${GH_AW_GITHUB_REPOSITORY}/compare/${TAG}...${DEFAULT_BRANCH}" > "${CMP}" 2>/dev/null &&
        jq -e 'type == "object" and has("commits")' "${CMP}" > /dev/null 2>&1; then
+      # Commit SHAs are deliberately not published here. Two runs picked a SHA
+      # out of that list and asserted it introduced the feature under triage,
+      # both citing a `chore: run avm pre-commit` commit that touched only
+      # workflow files. A SHA carries no clue about what it changed, so any SHA
+      # in the list reads as evidence. A PR number can be checked by reading the
+      # PR, so that is the only identifier the agent is given.
       jq --arg tag "${TAG}" --arg pub "${PUB}" '{
         loaded: true,
         has_release: true,
         latest_tag: $tag,
         latest_published_at: $pub,
         ahead_by: (.ahead_by // 0),
-        unreleased_shas: [.commits[]?.sha],
         unreleased_pr_numbers: ([.commits[]?.commit.message | scan("#([0-9]+)") | .[0] | tonumber] | unique)
       }' "${CMP}" > "${OUT}" ||
         printf '%s\n' "{\"loaded\":false,\"has_release\":true,\"latest_tag\":\"${TAG}\"}" > "${OUT}"
@@ -1357,9 +1362,8 @@ Do not judge release state from a PR body, a changelog, an earlier comment, or t
 | `has_release` | `false` means the module has never been released |
 | `latest_tag` / `latest_published_at` | the newest release |
 | `unreleased_pr_numbers` | **the deciding list** — PR numbers merged to the default branch that no release contains |
-| `unreleased_shas` | the commits behind those PR numbers, for reference only |
 
-**Decide from `unreleased_pr_numbers`, never from `unreleased_shas`.** A commit SHA carries no clue about what it changed, so picking one from the list and asserting it introduced the feature is a guess wearing the costume of evidence. Two runs did exactly that, both citing `262cb246` — a `chore: run avm pre-commit` commit touching only workflow files — as the origin of a variable it never touched. A PR number can be checked: you can read PR #229 and see whether it added the thing.
+The file carries no commit SHAs, by design. Two runs reached into a SHA list, picked one, and asserted it introduced the feature under triage — both naming `262cb246`, a `chore: run avm pre-commit` commit that touched only workflow files. A SHA says nothing about what it changed, so any SHA reads as evidence. A PR number can be checked: you can read PR #229 and see whether it added the thing.
 
 **Run this exact test on your fixing PR, and do not substitute judgement for it:**
 
