@@ -1020,8 +1020,8 @@ steps:
         --arg tag "${LATEST_TAG}" --arg published "${LATEST_PUBLISHED_AT}" '
         {
           version:1, loaded:$loaded, has_release:$has_release,
-          latest_tag:($tag | select(length > 0)) // null,
-          latest_published_at:($published | select(length > 0)) // null,
+          latest_tag:(($tag | select(length > 0)) // null),
+          latest_published_at:(($published | select(length > 0)) // null),
           reason:$reason,
           prs:[$numbers[] | {number:., status:"unknown", reason:$reason, release_tag:null}]
         }' > "${OUT}"

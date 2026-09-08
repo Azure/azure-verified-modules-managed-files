@@ -41,6 +41,8 @@ gh aw compile --dir terraform/root/.github/workflows
 
 The regression script requires PowerShell 7.4+, Bash, jq, and timeout. Ubuntu runners provide these tools; Windows can use Git Bash with jq on its PATH. Fixtures replace `gh` and execute the actual workflow shell without network access. They cover ancestry summaries beyond 250 commits, missing or misleading message references, merge results, release branches, pagination, API failures, evidence vetoes, and lookup budgets. The repository validation workflow runs both the canonical and compiled steps.
 
+Ubuntu CI checks compatibility with the runner's Bash and jq versions. Local runs with newer tools do not replace that check.
+
 Release proof uses each merged PR's post-merge commit, not a commit-message PR-number list. A positive result names a containing published stable release, not necessarily the first one. Divergent histories stay unknown unless another release proves inclusion; cherry-picked content is not automatically equivalent to the PR's merge result. The model must still establish that the PR fixes the issue and honor the human-reopen and incomplete-screening vetoes. These fixtures exercise computed evidence, not the model's final safe-output choices.
 
 ## Trademarks
