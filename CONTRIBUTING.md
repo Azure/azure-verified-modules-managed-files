@@ -29,21 +29,36 @@ mapped to that file group, so a change here lands in many repositories at once.
 Repository-to-group mapping lives in
 [`azure-verified-modules-tools`](https://github.com/Azure/azure-verified-modules-tools).
 
-## Changing issue triage release detection
+## Changing issue triage release verification
 
-Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate its lock with the `gh aw` version recorded in the lock header:
+Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate only its lock with the `gh aw` version recorded in the lock header:
 
 ```powershell
-gh aw compile --dir terraform/root/.github/workflows
+gh aw compile ./terraform/root/.github/workflows/issue-triage.md
 ./scripts/Test-IssueTriageReleaseStatus.ps1
 ./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
 ```
 
-The regression script requires PowerShell 7.4+, Bash, jq, and timeout. Ubuntu runners provide these tools; Windows can use Git Bash with jq on its PATH. Fixtures replace `gh` and execute the actual workflow shell without network access. They cover ancestry summaries beyond 250 commits, missing or misleading message references, merge results, release branches, pagination, API failures, evidence vetoes, and lookup budgets. The repository validation workflow runs both the canonical and compiled steps.
+The release regression script requires PowerShell 7.4+, Bash, jq, and timeout. Ubuntu runners provide these tools; Windows can use Git Bash with jq on its PATH. Fixtures replace `gh` and execute the actual workflow shell without network access. They cover ancestry summaries beyond 250 commits, missing or misleading message references, merge results, release branches, pagination, API failures, evidence vetoes, and lookup budgets.
+
+The output-gate fixtures also require Node and the pinned gh-aw runtime scripts. The validation workflow prepares those scripts with `github/gh-aw-actions/setup` at the same v0.85.4 commit as the compiled triage workflow. Set `$runtimeDirectory` to that setup destination, then run:
+
+```powershell
+./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory $runtimeDirectory
+./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory $runtimeDirectory -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
+```
+
+These fixtures exercise the actual gate with mocked GitHub calls. They cover direct close/label bypass attempts, exact-PR binding, trusted artifact integrity, newly discovered fixes, failed verification, preserved duplicate handling, and truthful blocked-action comments. The validation workflow runs both suites against the canonical and compiled workflow.
 
 Ubuntu CI checks compatibility with the runner's Bash and jq versions. Local runs with newer tools do not replace that check.
 
-Release proof uses each merged PR's post-merge commit, not a commit-message PR-number list. A positive result names a containing published stable release, not necessarily the first one. Divergent histories stay unknown unless another release proves inclusion; cherry-picked content is not automatically equivalent to the PR's merge result. The model must still establish that the PR fixes the issue and honor the human-reopen and incomplete-screening vetoes. These fixtures exercise computed evidence, not the model's final safe-output choices.
+Release proof uses each merged PR's post-merge commit, not a commit-message PR-number list. A positive result names a containing published stable release, not necessarily the first one. Divergent histories stay unknown unless another release proves inclusion; cherry-picked content is not automatically equivalent to the PR's merge result.
+
+The initial candidate list guides discovery and screening; it does not limit which fixing PR can be verified. Before native output handlers run, trusted code checks the exact PR identified in the mandatory comment's structured decision. A fresh successful lookup can authorize a fix that the initial search missed. Missing or failed final verification cannot be replaced by another PR's release status, an initial positive result, or the model's own Git commands.
+
+The verifier and discovery evidence come from a separate trusted job. The gate independently downloads their artifact by its captured ID and verifies the manifest and file hashes before use. Partial reruns may reuse a successful producer's snapshot, bound to that producer's recorded attempt; they still perform fresh release verification. Never load authorization or executable code from the agent's artifact. The gate's comments report requested, authorized, or blocked actions; native handler results record whether GitHub actually applied them.
+
+The model must still establish that the PR fixes the issue and honor the human-reopen and incomplete-screening vetoes. Code can enforce release proof and declared screening coverage, not prove semantic relevance. Compiler or runtime upgrades must rerun the source and compiled fixtures, including the generated schema and gate-order assertions.
 
 ## Trademarks
 
