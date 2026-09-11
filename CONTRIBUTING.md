@@ -65,6 +65,12 @@ The verifier and discovery evidence come from a separate trusted job. The gate i
 
 The model must still establish that the PR fixes the issue and honor the human-reopen and incomplete-screening vetoes. Code can enforce release proof and declared screening coverage, not prove semantic relevance. Compiler or runtime upgrades must rerun the source and compiled fixtures, including the generated schema and gate-order assertions.
 
+Native targets accept positive safe integers or canonical decimal strings, such as `291` and `"291"`. The gate rejects whitespace, leading zeroes, fractions, signs, suffixes, booleans, unsafe integers, and conflicting targets. This is intentionally narrower than the v0.85.4 native `temporary_id.cjs` parser. Decision fields, inspection lists, duplicate references, and proof PR identities still require typed integers.
+
+`screened_inventory_prs` records every inventory row actually screened, including irrelevant rows. `fully_inspected_prs` records the smaller set whose real diffs and supporting evidence were inspected, plus any selected fix outside the index. The prompt provides a missing-work comparison, not automatic declarations. The gate reports missing PR numbers and retains the incomplete-screening veto.
+
+Captured fixtures under `scripts/fixtures/issue-triage/` preserve the original requested outputs and trusted indexes from example-repository runs `34524301967` (B290) and `34525229100` (C291). B290 must remain blocked with 44 of 47 inventory rows undeclared. C291 must admit its unchanged string-target request for fresh PR #56 proof. API responses in these fixtures are mocks; passing them is not a new sandbox acceptance result. Later sandbox runs must still cover awaiting release, outside-index fixes, genuine final-proof failure, raw bypass attempts, first closure, human reopen, duplicates, and ordinary outputs.
+
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of

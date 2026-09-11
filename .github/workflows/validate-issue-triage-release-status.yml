@@ -10,6 +10,7 @@ on:
       - "scripts/Test-IssueTriageReleaseStatus.ps1"
       - "scripts/Test-IssueTriageSafetyGate.ps1"
       - "scripts/Test-IssueTriageIsolation.ps1"
+      - "scripts/fixtures/issue-triage/**"
       - ".github/workflows/validate-issue-triage-release-status.yml"
   workflow_dispatch:
 

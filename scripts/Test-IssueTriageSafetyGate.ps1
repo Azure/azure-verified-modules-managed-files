@@ -141,6 +141,7 @@ try {
     $input = @{
         gate = $gate; prepare = $prepare; render = $render; seal = $seal
         runtime = (Resolve-Path $RuntimeDirectory).Path; bash = $BashPath; windows = $IsWindows
+        fixtures = (Join-Path $PSScriptRoot 'fixtures\issue-triage')
         patterns = $CaseName
     }
     [IO.File]::WriteAllText((Join-Path $temporaryRoot 'input.json'), ($input | ConvertTo-Json -Depth 10), [Text.UTF8Encoding]::new($false))
@@ -151,6 +152,7 @@ const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const core = { info(){}, debug(){}, warning(){}, error(){}, setOutput(){}, setFailed(message){throw Error(message);}, startGroup(){}, endGroup(){} };
 global.core = core;
 const nativeRequire = name => require(path.join(input.runtime, name));
+const { resolveSafeOutputIssueTarget } = nativeRequire('temporary_id.cjs');
 const { normalizeIssueIntentLabelInputs } = nativeRequire('issue_intents.cjs');
 const { validateLabels } = nativeRequire('safe_output_validator.cjs');
 const effective = label => validateLabels(normalizeIssueIntentLabelInputs([label]).map(l => typeof l === 'string' ? l : l.name), undefined, 10).value?.[0];
@@ -185,7 +187,7 @@ function fixture() {
       [`api repos/owner/module/compare/${merge}...${tag}?per_page=1`]:compare(tag)
     },
     items:[], labels:[fixed,awaiting,feature], artifact:'123', manifestChange:()=>{}, afterSeal:()=>{}, proofChange:null,
-    expectedCalls:true, keepFeature:true
+    expectedCalls:true, keepFeature:true, issue:288, expectedTypes:1
   };
 }
 test('typed 56 outside initial index freshly released',()=>{},'released');
@@ -248,6 +250,73 @@ test('valid candidate marker cannot replace declared inspection',f=>{
 });
 test('missing selected inspection',f=>{f.decision.fully_inspected_prs=[227];f.expectedCalls=false;});
 test('missing inventory screening',f=>{f.decision.screened_inventory_prs=[];f.expectedCalls=false;});
+function captured(f, name, issue) {
+  const directory=path.join(input.fixtures,name);
+  f.rawItems=fs.readFileSync(path.join(directory,'safeoutputs.jsonl'),'utf8').trim().split(/\r?\n/).map(line=>JSON.parse(line));
+  f.decision=f.rawItems.find(i=>i.type==='add_comment').data;
+  f.index=JSON.parse(fs.readFileSync(path.join(directory,'pr-candidate-screening-index.json')));
+  f.status=JSON.parse(fs.readFileSync(path.join(directory,'pr-candidate-status.json')));
+  f.issue=issue;
+}
+test('captured C291 native string targets reach outside-index proof',f=>{
+  captured(f,'case-c',291);f.checkNativeTargets=true;
+},'released');
+test('captured B290 three of 47 screened stays vetoed',f=>{
+  captured(f,'case-b',290);f.expectedCalls=false;f.expectedMissingInventory=44;
+});
+for(const outcome of ['released','awaiting','unknown']) {
+  test('47 screened with three inventory inspections '+outcome,f=>{
+    const rows=Array.from({length:47},(_,i)=>candidate(i+100,false));
+    for(const row of rows)row.lexical_relevance.plausible=[100,101,102].includes(row.number);
+    f.index={...f.index,candidate_count:47,merged_inventory_count:47,required_inspection_count:0,required_inspection_numbers:[],required_inspection:[],open_inventory_screening:rows};
+    f.status={...f.status,candidate_count:47,merged_inventory_count:47,required_inspection_count:0,required_inspection_numbers:[],exact_required_inspection_count:0,exact_required_inspection_numbers:[]};
+    // Controlled semantic declarations, not a claim that an agent inspected these fixture PRs.
+    f.decision.screened_inventory_prs=Array.from({length:47},(_,i)=>i+100);
+    f.decision.fully_inspected_prs=[56,100,101,102];
+    if(outcome==='awaiting')f.responses[`api repos/owner/module/compare/${merge}...${tag}?per_page=1`]=compare(tag,'behind');
+    if(outcome==='unknown')delete f.responses['api repos/owner/module/pulls/56'];
+  },outcome==='unknown'?'blocked':outcome);
+}
+for(const target of ['288',288]) {
+  test('native compatible issue target '+JSON.stringify(target),f=>{
+    f.outputChange=items=>{for(const item of items)for(const key of ['item_number','issue_number'])if(Object.hasOwn(item,key))item[key]=target;};
+    f.nativeMode='success';
+  },'released');
+}
+test('matching numeric string alias',f=>{f.commentAlias='288';},'released');
+for(const issue of [1,Number.MAX_SAFE_INTEGER]) {
+  test('native string safe integer boundary '+issue,f=>{f.issue=issue;f.commentTarget=String(issue);},'released');
+}
+test('native PR string target stays bound to typed selection',f=>{
+  nativePrFixture(f);f.items[0].pull_request_number='56';
+});
+test('native PR string wrong selection rejected',f=>{
+  nativePrFixture(f,{},0);f.items[0].pull_request_number='227';
+});
+const invalidTargets=[0,-1,1.5,9007199254740992,true,false,null,'','0','-1','288.0','2.88e2','+288',' 288','288 ','288\n','288\r','288\t','288\u2028','0288','288x','0x120','#288','9007199254740992',[],{}];
+for(const value of invalidTargets)for(const type of ['add_comment','set_issue_type','add_labels']) {
+  test('invalid native '+type+' target '+JSON.stringify(value),f=>{
+    f.outputChange=items=>{items.find(i=>i.type===type)[type==='set_issue_type'?'issue_number':'item_number']=value;};
+    f.expectedCalls=false;
+    if(type==='set_issue_type')f.expectedTypes=0;
+    if(type==='add_labels')f.keepFeature=false;
+  });
+}
+test('native string wrong issue target',f=>{f.commentTarget='289';f.expectedCalls=false;});
+test('native string conflicting alias',f=>{f.commentAlias='289';f.expectedCalls=false;});
+test('native string target cannot coerce typed PR decision',f=>{
+  f.commentTarget='288';f.decision.fixing_pr='56';f.expectedCalls=false;
+});
+test('native string target cannot coerce proof PR identity',f=>{
+  f.commentTarget='288';f.proofChange=(p,file)=>{p.prs[0].number='56';write(file,p);};
+});
+test('native string raw bypass remains blocked',f=>{
+  f.commentTarget='288';f.items.push({type:'close_issue',issue_number:'288',state_reason:'completed'},{type:'add_labels',item_number:'288',labels:[fixed]});f.expectedCalls=false;
+});
+test('native string duplicate remains independent',f=>{
+  f.commentTarget='288';f.decision.release_action='none';f.expectedCalls=false;
+  f.items.push({type:'close_issue',issue_number:'288',state_reason:'duplicate',duplicate_of:12});f.nativeMode='duplicate';
+},'duplicate');
 test('explicit duplicate independent of PR collection',f=>{
   f.decision.release_action='none';f.decision.fixing_pr=0;f.decision.fix_confidence='none';f.status.complete=false;
   f.items.push({type:'close_issue',issue_number:288,state_reason:'duplicate',duplicate_of:12,body:'untrusted original body'});
@@ -402,14 +471,14 @@ async function checkNativePr(items, expectedWrites) {
   assert.equal(current.state,'open');assert.deepEqual(current.base,{ref:'main'});assert.equal(current.draft,false);assert.equal(current.title,'Original title');
 }
 
-const matches = name => input.patterns.some(p=>new RegExp('^'+p.split('*').map(s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('.*')+'$','i').test(name));
+const matches = name => input.patterns.some(p=>new RegExp('^'+p.split('*').map(s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('.*')+'$','is').test(name));
 const selected = cases.filter(c=>matches(c.name));
 assert(selected.length>0,'No gate scenarios matched CaseName');
 async function runCase(c,ordinal) {
   const f=fixture();c.mutate(f);
   const root=path.join(__dirname,`case-${ordinal}`), producer=path.join(root,'producer'), gateDir=path.join(root,'gate'), agent=path.join(root,'agent'), bin=path.join(root,'bin');
   for(const dir of [producer,gateDir,agent,bin]) fs.mkdirSync(dir,{recursive:true});
-  const env={...process.env,GH_AW_GITHUB_REPOSITORY:'owner/module',DEFAULT_BRANCH:'main',TRIAGE_REPOSITORY:'owner/module',TRIAGE_DEFAULT_BRANCH:'main',TRIAGE_ISSUE:'288',TRIAGE_WORKFLOW_SHA:'f'.repeat(40),GITHUB_RUN_ID:'777',GITHUB_RUN_ATTEMPT:'1',TRIAGE_GATE_DIRECTORY:gateDir,TRIAGE_ARTIFACT_ID:f.artifact,GH_TOKEN:'fixture-token',GITHUB_TOKEN:'fixture-token',FIXTURE_BIN:bashPath(bin),FIXTURE_CALLS:bashPath(path.join(root,'calls.txt'))};
+  const env={...process.env,GH_AW_GITHUB_REPOSITORY:'owner/module',DEFAULT_BRANCH:'main',TRIAGE_REPOSITORY:'owner/module',TRIAGE_DEFAULT_BRANCH:'main',TRIAGE_ISSUE:String(f.issue),TRIAGE_WORKFLOW_SHA:'f'.repeat(40),GITHUB_RUN_ID:'777',GITHUB_RUN_ATTEMPT:'1',TRIAGE_GATE_DIRECTORY:gateDir,TRIAGE_ARTIFACT_ID:f.artifact,GH_TOKEN:'fixture-token',GITHUB_TOKEN:'fixture-token',FIXTURE_BIN:bashPath(bin),FIXTURE_CALLS:bashPath(path.join(root,'calls.txt'))};
   env.GITHUB_RUN_ATTEMPT=f.producerAttempt||'1';
   env.RUNNER_TEMP=root;env.GITHUB_REPOSITORY='owner/module';env.GH_AW_WORKFLOW_NAME='issue-triage';
   // Only decorative runtime templates are mocked; handlers and sanitizers are
@@ -419,7 +488,7 @@ async function runCase(c,ordinal) {
   write(path.join(env.GH_AW_PROMPTS_DIR,'workflow_install_note.md'),'Fixture workflow footer.\n');
   write(path.join(producer,'pr-candidate-status.json'),f.status);write(path.join(producer,'pr-candidate-screening-index.json'),f.index);
   write(path.join(producer,'issue-candidate-index.json'),{loaded:true,complete:true,success:true,errors:[],version:1,query_count:0,queries:[],candidate_count:0,candidates:[],open_candidate_count:0,must_compare:[]});
-  write(path.join(producer,'issue-number.txt'),'288\n');write(path.join(producer,'issue-type.txt'),'NONE\n');
+  write(path.join(producer,'issue-number.txt'),`${f.issue}\n`);write(path.join(producer,'issue-type.txt'),'NONE\n');
   write(path.join(producer,'issue-state-history.json'),f.history);write(path.join(producer,'repo-labels.json'),f.labels.map(name=>({name,description:'fixture'})));
   write(path.join(producer,'release-status.json'),f.initial);
   let mock='#!/usr/bin/env bash\nset -euo pipefail\nprintf "%s\\n" "$*" >> "$FIXTURE_CALLS"\ncase "$*" in\n';
@@ -460,13 +529,22 @@ async function runCase(c,ordinal) {
     process.env.TRIAGE_MANIFEST_SHA256=f.badHash?'0'.repeat(64):manifestHash;
     process.env.TRIAGE_PRODUCER_ATTEMPT=Object.hasOwn(f,'producerOutputOverride')?f.producerOutputOverride:producerAttempt;
     process.env.GITHUB_RUN_ATTEMPT=f.consumerAttempt??env.GITHUB_RUN_ATTEMPT;
-    const comment={type:'add_comment',item_number:f.commentTarget||288,body:'OLD BODY: Closed as completed and applied Fixed.'};
+    const comment={type:'add_comment',item_number:f.commentTarget??f.issue,body:'OLD BODY: Closed as completed and applied Fixed.'};
     if(f.decision)comment.data=f.decision;
     if(f.commentAlias)comment.issue_number=f.commentAlias;
     if(f.commentExtra)Object.assign(comment,f.commentExtra);
     if(f.tainted){comment.tainted=true;comment.temporary_id='aw_comment_123';comment.integrity={level:'low',source:'fixture'};}
-    const items=[...(f.omitComment?[]:[comment]),{type:'set_issue_type',issue_number:288,issue_type:'Feature'},{type:'add_labels',item_number:288,labels:[feature]},...f.items];
+    const items=f.rawItems??[...(f.omitComment?[]:[comment]),{type:'set_issue_type',issue_number:f.issue,issue_type:'Feature'},{type:'add_labels',item_number:f.issue,labels:[feature]},...f.items];
     if(f.secondComment)items.push({...comment});
+    if(f.outputChange)f.outputChange(items);
+    if(f.checkNativeTargets) {
+      for(const item of items) {
+        const key=item.type==='set_issue_type'?'issue_number':'item_number';
+        const result=resolveSafeOutputIssueTarget({message:item,tempIdMap:new Map(),repoParts:{owner:'owner',repo:'module'},handlerType:item.type,aliases:[key]});
+        assert.equal(result.success,true);
+        assert.equal(result.number,f.issue,'Pinned runtime must accept the captured target');
+      }
+    }
     const original={items,errors:f.errors||[],temporary_ids:{aw_original_123:{number:288,repo:'owner/module'}},...(f.tainted?{tainted:true}:{})};
     const output=path.join(agent,'safe-outputs.json');write(output,original);process.env.GH_AW_AGENT_OUTPUT=output;
     let executions=0;
@@ -490,10 +568,16 @@ async function runCase(c,ordinal) {
     await new AsyncFunction('require','core',input.gate)(fixtureRequire,core);
     const result=JSON.parse(fs.readFileSync(output)),report=JSON.parse(fs.readFileSync(path.join(gateDir,'triage-gate-report.json')));
     const close=result.items.filter(i=>i.type==='close_issue'), releaseLabels=result.items.filter(i=>i.type==='add_labels').flatMap(i=>i.labels.map(effective)).filter(n=>[fixed,awaiting].includes(n));
-    assert.equal(result.items[0].type,'add_comment');assert.equal(result.items[0].item_number,288);
+    assert.equal(result.items[0].type,'add_comment');assert.equal(result.items[0].item_number,f.issue);
     for(const key of ['pr-number','comment_id','commentId','comment-id','reply_to_id','target'])assert.equal(result.items[0][key],undefined);
     assert(!result.items[0].body.includes('OLD BODY'));assert(!/Closed as completed|applied Fixed/.test(result.items[0].body));
-    assert.equal(result.items.filter(i=>i.type==='set_issue_type'&&i.issue_type==='Feature').length,1);
+    assert.equal(result.items.filter(i=>i.type==='set_issue_type'&&i.issue_type==='Feature').length,f.expectedTypes);
+    if(f.expectedMissingInventory!==undefined) {
+      assert.equal(report.missing_inventory_screening.length,f.expectedMissingInventory);
+      assert(report.reasons.includes('incomplete_collection_or_screening'));
+      assert.deepEqual(report.missing_full_inspection,[]);
+      assert.equal(report.proposed_pr,238);
+    }
     assert.deepEqual(result.errors,original.errors);assert.deepEqual(result.temporary_ids,original.temporary_ids);
     if(f.keepFeature)assert(result.items.some(i=>i.type==='add_labels'&&i.labels.some(l=>effective(l)===feature)));
     assert(!result.items.some(i=>i.type==='add_labels'&&i.labels.length===0));
