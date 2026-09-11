@@ -6,10 +6,10 @@ on:
     branches:
       - main
     paths:
-      - "terraform/root/.github/workflows/issue-triage.md"
-      - "terraform/root/.github/workflows/issue-triage.lock.yml"
+      - "terraform/**"
       - "scripts/Test-IssueTriageReleaseStatus.ps1"
       - "scripts/Test-IssueTriageSafetyGate.ps1"
+      - "scripts/Test-IssueTriageIsolation.ps1"
       - ".github/workflows/validate-issue-triage-release-status.yml"
   workflow_dispatch:
 
@@ -27,8 +27,9 @@ jobs:
       - name: Exercise canonical and compiled release proof
         shell: pwsh
         run: |
+          ./scripts/Test-IssueTriageIsolation.ps1
           ./scripts/Test-IssueTriageReleaseStatus.ps1
-          ./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
+          ./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/canary-ring-0/.github/workflows/issue-triage.lock.yml
 
       - name: Prepare pinned triage runtime
         uses: github/gh-aw-actions/setup@2709137ea6c5b0e19aa621454dc643ea8dc526b1 # v0.85.4
@@ -40,4 +41,4 @@ jobs:
         shell: pwsh
         run: |
           ./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory '${{ runner.temp }}/triage-runtime'
-          ./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory '${{ runner.temp }}/triage-runtime' -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
+          ./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory '${{ runner.temp }}/triage-runtime' -WorkflowPath ./terraform/canary-ring-0/.github/workflows/issue-triage.lock.yml

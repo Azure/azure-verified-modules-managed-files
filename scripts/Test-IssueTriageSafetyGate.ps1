@@ -9,7 +9,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string] $WorkflowPath = (Join-Path $PSScriptRoot '..\terraform\root\.github\workflows\issue-triage.md'),
+    [string] $WorkflowPath = (Join-Path $PSScriptRoot '..\terraform\canary-ring-0\.github\workflows\issue-triage.md'),
     [string] $RuntimeDirectory = $(if ($env:RUNNER_TEMP) { Join-Path $env:RUNNER_TEMP 'gh-aw/actions' } else { '/opt/gh-aw/actions' }),
     [string] $BashPath = $(if ($IsWindows) { 'C:\Program Files\Git\bin\bash.exe' } else { '/bin/bash' }),
     [string[]] $CaseName = @('*')

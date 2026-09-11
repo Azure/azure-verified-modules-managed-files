@@ -31,12 +31,17 @@ Repository-to-group mapping lives in
 
 ## Changing issue triage release verification
 
-Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate only its lock with the `gh aw` version recorded in the lock header:
+The new release gate is staged in `terraform/canary-ring-0/.github/workflows/`. That overlay targets only `Azure/terraform-azurerm-avm-ptn-example-repo` under the approved tools repository mapping. Ring 1 and fleet promotion require separate approval. Do not change cohort membership or copy this pair into root as part of staging.
+
+The root Markdown and lock retain the exact published `v1.0.29` bytes. This includes restoring the unreleased release-ancestry changes from PR #49, not just moving PR #50's gate. Other overlays must neither replace nor delete either file.
+
+Edit `terraform/canary-ring-0/.github/workflows/issue-triage.md`, then regenerate only its lock with `gh aw` v0.85.4:
 
 ```powershell
-gh aw compile ./terraform/root/.github/workflows/issue-triage.md
+gh aw compile ./terraform/canary-ring-0/.github/workflows/issue-triage.md
+./scripts/Test-IssueTriageIsolation.ps1
 ./scripts/Test-IssueTriageReleaseStatus.ps1
-./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
+./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/canary-ring-0/.github/workflows/issue-triage.lock.yml
 ```
 
 The release regression script requires PowerShell 7.4+, Bash, jq, and timeout. Ubuntu runners provide these tools; Windows can use Git Bash with jq on its PATH. Fixtures replace `gh` and execute the actual workflow shell without network access. They cover ancestry summaries beyond 250 commits, missing or misleading message references, merge results, release branches, pagination, API failures, evidence vetoes, and lookup budgets.
@@ -45,10 +50,10 @@ The output-gate fixtures also require Node and the pinned gh-aw runtime scripts.
 
 ```powershell
 ./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory $runtimeDirectory
-./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory $runtimeDirectory -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
+./scripts/Test-IssueTriageSafetyGate.ps1 -RuntimeDirectory $runtimeDirectory -WorkflowPath ./terraform/canary-ring-0/.github/workflows/issue-triage.lock.yml
 ```
 
-These fixtures exercise the actual gate with mocked GitHub calls. They cover direct close/label bypass attempts, exact-PR binding, trusted artifact integrity, newly discovered fixes, failed verification, preserved duplicate handling, and truthful blocked-action comments. The validation workflow runs both suites against the canonical and compiled workflow.
+These fixtures exercise the actual gate with mocked GitHub calls. They cover direct close/label bypass attempts, exact-PR binding, trusted artifact integrity, newly discovered fixes, failed verification, preserved duplicate handling, and truthful blocked-action comments. The validation workflow runs both suites against the canonical and compiled overlay. The isolation assertion checks stable root bytes and rejects competing overlays, deletions, or line edits to the pair.
 
 Ubuntu CI checks compatibility with the runner's Bash and jq versions. Local runs with newer tools do not replace that check.
 
