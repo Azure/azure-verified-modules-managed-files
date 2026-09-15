@@ -24,6 +24,7 @@
     ".github/actions/version-check/action.yml",
     ".github/policies/avmrequiredfiles.yml",
     ".github/policies/branch-protection.yml",
+    ".github/policies/branchprotection.yml",
     ".github/workflows/e2e.yml",
     ".github/workflows/grept_cronjob.yml",
     ".github/workflows/linting.yml",
