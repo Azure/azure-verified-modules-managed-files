@@ -1,0 +1,9 @@
+# Paths override CodeQL's default Actions coverage, so retain root workflows
+# and action metadata while including managed workflows in each file group.
+paths:
+  - '.github/workflows/**'
+  - '.github/reusable_workflows/**'
+  - 'terraform/*/.github/workflows/**'
+  - '**/action.yml'
+  - '**/action.yaml'
+  - '**/actions.lock'
