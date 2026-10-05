@@ -16,7 +16,7 @@ Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 
 $Root = (Resolve-Path -LiteralPath $Root).Path
-$lockFiles = @(Get-ChildItem -LiteralPath $Root -Recurse -File -Filter '*.lock.yml' | Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } | Sort-Object -Property FullName)
+$lockFiles = @(Get-ChildItem -LiteralPath $Root -Recurse -Force -File -Filter '*.lock.yml' | Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } | Sort-Object -Property FullName)
 if ($lockFiles.Count -eq 0) {
     throw [System.InvalidOperationException]::new("No .lock.yml files found under $Root.")
 }
