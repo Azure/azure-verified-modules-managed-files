@@ -1,0 +1,21 @@
+{
+  "issue_number": 290,
+  "repository": "Azure/terraform-azurerm-avm-ptn-example-repo",
+  "loaded": true,
+  "complete": true,
+  "success": true,
+  "errors": [],
+  "candidate_count": 47,
+  "open_inventory_count": 22,
+  "merged_inventory_count": 25,
+  "required_inspection_count": 0,
+  "required_inspection_numbers": [],
+  "exact_required_inspection_count": 0,
+  "exact_required_inspection_numbers": [],
+  "timeline_required_inspection_count": 0,
+  "timeline_required_inspection_numbers": [],
+  "commit_required_inspection_count": 0,
+  "commit_required_inspection_numbers": [],
+  "screening_index_path": "/tmp/gh-aw/agent/pr-candidate-screening-index.json",
+  "index_version": 1
+}

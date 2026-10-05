@@ -9,7 +9,7 @@
 
 [CmdletBinding()]
 param(
-    [string] $WorkflowPath = (Join-Path $PSScriptRoot '..\terraform\root\.github\workflows\issue-triage.md'),
+    [string] $WorkflowPath = (Join-Path $PSScriptRoot '..\terraform\canary-ring-0\.github\workflows\issue-triage.md'),
     [string] $BashPath = $(if ($IsWindows) { 'C:\Program Files\Git\bin\bash.exe' } else { 'bash' }),
     [string[]] $CaseName = @('*')
 )
@@ -87,7 +87,7 @@ function New-Case {
     $case = @{
         Name = $Name; Numbers = @(270); Complete = $true; MissingIndex = $false; Budget = 200
         Expected = @{ '270' = @($Expected, $Reason) }; Responses = @{}
-        HasRelease = $true; Loaded = $true; Tags = @{}
+        HasRelease = $true; Loaded = $true; Tags = @{}; Mode = 'prefetched'; Selected = '270'
     }
     Add-Response $case $script:ReleaseRequest @(New-Release)
     Add-Response $case $script:DefaultRequest @{ sha = $script:Default }
@@ -354,11 +354,36 @@ $case.Tags['270'] = 'module/v1.0.0'
 $cases.Add($case)
 
 $renderShell = Get-WorkflowShell 'Render triage evidence blocks'
+$prepareShell = Get-WorkflowShell 'Prepare release proof verifier'
 $releaseShell = Get-WorkflowShell 'Fetch release status'
-if (-not ($releaseShell.Contains('REQUEST_LIMIT=200') -and $releaseShell.Contains('DEADLINE=$((SECONDS + 180))') -and $releaseShell.Contains('timeout 20s gh api'))) {
+if (-not ($prepareShell.Contains('REQUEST_LIMIT=200') -and $prepareShell.Contains('DEADLINE=$((SECONDS + 180))') -and $prepareShell.Contains('timeout 20s gh api'))) {
     throw 'Expected the production budgets: 200 invocations, 180 seconds, 20 seconds per invocation.'
 }
-if ($releaseShell -match 'unreleased_pr_numbers|unreleased_shas') { throw 'Release proof must not use a negative identifier list.' }
+if ($prepareShell -match 'unreleased_pr_numbers|unreleased_shas') { throw 'Release proof must not use a negative identifier list.' }
+if (-not $releaseShell.Contains('triage-release-proof.sh prefetched')) { throw 'Prefetch must call the shared verifier.' }
+if ($cases.Count -ne 45) { throw "Expected the original 45 scenarios, found $($cases.Count)." }
+# Exercise the same positive algorithm for one selected PR outside the initial
+# index. Do not manufacture an index entry or replace the validation marker.
+foreach ($original in @($cases.ToArray())) {
+    if ($original.Expected.Count -ne 1 -or -not $original.Complete -or $original.MissingIndex) { continue }
+    $selected = $original | ConvertTo-Json -Depth 50 -Compress | ConvertFrom-Json -AsHashtable
+    $selected.Name = 'selected outside index: ' + $original.Name
+    $selected.Mode = 'selected'
+    $selected.Numbers = @(227)
+    $cases.Add($selected)
+}
+$case = New-Case 'selected mode does not fabricate discovery success'
+$case.Mode = 'selected'; $case.MissingIndex = $true; $case.Complete = $false
+$cases.Add($case)
+foreach ($invalid in @('0', '-1', '1.5', '9007199254740992', '56;echo unsafe', 'abc')) {
+    $case = New-Case "selected rejects invalid number $invalid"
+    $case.Mode = 'selected'; $case.Selected = $invalid
+    $case.Expected = @{}; $case.Loaded = $false; $case.HasRelease = $null
+    $cases.Add($case)
+}
+$case = New-Case 'selected request budget fails closed' 'unknown' 'request_budget_exhausted'
+$case.Mode = 'selected'; $case.Budget = 3
+$cases.Add($case)
 $cases = @($cases | Where-Object {
     $name = $_.Name
     @($CaseName | Where-Object { $name -like $_ }).Count -gt 0
@@ -403,7 +428,13 @@ try {
         if ($IsWindows) { $script += "chmod +x '$bashBin/jq'`n" }
         $script += $renderShell.Replace('/tmp/gh-aw/agent', $bashDirectory)
         # Lower only the constant for the boundary case; execute the same budget logic.
-        $script += $releaseShell.Replace('/tmp/gh-aw/agent', $bashDirectory).Replace('REQUEST_LIMIT=200', "REQUEST_LIMIT=$($case.Budget)")
+        $script += $prepareShell.Replace('/tmp/gh-aw/agent', $bashDirectory).Replace('REQUEST_LIMIT=200', "REQUEST_LIMIT=$($case.Budget)")
+        if ($case.Mode -eq 'selected') {
+            $selectedNumber = $case.Selected.Replace("'", "'\''")
+            $script += "bash '$bashDirectory/triage-release-proof.sh' selected '$bashDirectory' '$bashDirectory/release-status.json' '$selectedNumber'`n"
+        } else {
+            $script += $releaseShell.Replace('/tmp/gh-aw/agent', $bashDirectory)
+        }
         $scriptPath = Join-Path $directory 'run.sh'
         [IO.File]::WriteAllText($scriptPath, $script, [Text.UTF8Encoding]::new($false))
         $start = [Diagnostics.ProcessStartInfo]::new($BashPath)
@@ -441,7 +472,15 @@ try {
         }
         if (@($calls | Where-Object { $_ -eq $TagRequest }).Count -gt 1) { throw "$($case.Name): release tag was not pinned once." }
         if ($calls.Count -gt $case.Budget) { throw "$($case.Name): request budget exceeded." }
-        if ((-not $case.Complete -or $case.MissingIndex) -and $calls.Count -gt 0) { throw "$($case.Name): ignored evidence veto." }
+        if ($case.Mode -eq 'prefetched' -and (-not $case.Complete -or $case.MissingIndex) -and $calls.Count -gt 0) { throw "$($case.Name): ignored evidence veto." }
+        if ($case.Mode -eq 'selected') {
+            if (@($calls | Where-Object { $_ -match '/pulls/' -and $_ -ne 'api repos/owner/module/pulls/270' }).Count -gt 0) { throw "$($case.Name): looked up a PR other than the selection." }
+            if ($case.Expected.Count -eq 0 -and $calls.Count -ne 0) { throw "$($case.Name): invalid input performed API calls." }
+            if ($case.MissingIndex) {
+                $marker = Get-Content (Join-Path $directory 'pr-evidence-validation.json') -Raw | ConvertFrom-Json
+                if ($marker.valid) { throw "$($case.Name): selected mode fabricated a validation marker." }
+            }
+        }
         Write-Host "PASS $($case.Name)"
     }
     Write-Host "All $($cases.Count) release-proof scenarios passed: $WorkflowPath"

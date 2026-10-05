@@ -1,0 +1,1754 @@
+{
+  "version": 1,
+  "issue_number": 291,
+  "repository": "Azure/terraform-azurerm-avm-ptn-example-repo",
+  "loaded": true,
+  "complete": true,
+  "success": true,
+  "errors": [],
+  "candidate_count": 47,
+  "open_inventory_count": 22,
+  "merged_inventory_count": 25,
+  "required_inspection_count": 0,
+  "required_inspection_numbers": [],
+  "required_inspection": [],
+  "open_inventory_screening": [
+    {
+      "number": 32,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/32",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 33,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/33",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 36,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/36",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 37,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/37",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 39,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/39",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 41,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/41",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 47,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/47",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 49,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/49",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 51,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/51",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 52,
+      "title": "Adding Microsoft SECURITY.MD",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/52",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Please accept this contribution adding the standard Microsoft SECURITY.MD :lock: file to help the community understand the security policy and how to safely report security issues. GitHub uses the presence of this file to light-up security reminders and a link to the file. This p",
+      "file_names": [
+        "SECURITY.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "report",
+            "source"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 149,
+      "title": "chore(deps): bump the terraform group across 5 directories with 2 updates",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/149",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Bumps the terraform group with 1 update in the /examples/every-region directory: [azure/avm-utl-regions/azurerm](https://github.com/Azure/terraform-azurerm-avm-utl-regions).\nBumps the terraform group with 2 updates in the /examples/example-a directory: [azure/avm-utl-regions/azur",
+      "file_names": [
+        "examples/every-region/README.md",
+        "examples/every-region/main.tf",
+        "examples/example-a/README.md",
+        "examples/example-a/main.tf",
+        "examples/example-b/README.md",
+        "examples/example-b/main.tf",
+        "examples/example-c/README.md",
+        "examples/example-c/main.tf",
+        "examples/ignore_example_for_e2e/README.md",
+        "examples/ignore_example_for_e2e/main.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 23,
+        "plausible": true,
+        "signals": {
+          "issue_title_to_pr_title": [
+            "group"
+          ],
+          "issue_title_to_pr_body": [
+            "group"
+          ],
+          "issue_body_to_pr_title": [
+            "group"
+          ],
+          "issue_body_to_pr_body": [
+            "group"
+          ],
+          "issue_identifiers_to_file_names": [
+            "ignore",
+            "ignore_example_for_e2e",
+            "readme"
+          ],
+          "issue_title_to_file_names": [
+            "ignore",
+            "ignore_example_for_e2e"
+          ]
+        }
+      }
+    },
+    {
+      "number": 167,
+      "title": "fix(examples): align versions and network guidance",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/167",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nAligns every example with the root module's Terraform and AzAPI version constraints. It also replaces resource-group-like virtual network names with the naming module's virtual network output and removes unsupported null-location guidance.\n\nFixes #163\nFixes #165",
+      "file_names": [
+        "examples/every-region/README.md",
+        "examples/every-region/main.tf",
+        "examples/example-a/README.md",
+        "examples/example-a/main.tf",
+        "examples/example-b/README.md",
+        "examples/example-b/main.tf",
+        "examples/example-c/README.md",
+        "examples/example-c/main.tf",
+        "examples/ignore_example_for_e2e/README.md",
+        "examples/ignore_example_for_e2e/main.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 20,
+        "plausible": true,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [
+            "group"
+          ],
+          "issue_body_to_pr_title": [
+            "network"
+          ],
+          "issue_body_to_pr_body": [
+            "group",
+            "network",
+            "virtual"
+          ],
+          "issue_identifiers_to_file_names": [
+            "ignore",
+            "ignore_example_for_e2e",
+            "readme"
+          ],
+          "issue_title_to_file_names": [
+            "ignore",
+            "ignore_example_for_e2e"
+          ]
+        }
+      }
+    },
+    {
+      "number": 168,
+      "title": "feat: expose requested virtual network address space",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/168",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nAdds a `requested_address_space` output for callers that need to compose other configuration from the exact input supplied to the module.\n\nThis output intentionally does not read values back from Azure and does not provide the effective Azure-normalized address sp",
+      "file_names": [
+        "README.md",
+        "outputs.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 10,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [
+            "network",
+            "requested",
+            "virtual"
+          ],
+          "issue_body_to_pr_body": [
+            "adds",
+            "requested"
+          ],
+          "issue_identifiers_to_file_names": [
+            "readme"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 176,
+      "title": "fix: validate virtual network parent resource ID",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/176",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nValidates the supplied parent resource ID as a resource group during Terraform planning so invalid scopes fail before an Azure request is made.\n\nRelated context: #172\n\n## Type of Change\n\n- [ ] Non-module change (e.g. CI/CD, documentation, etc.)\n- [x] Azure Verifie",
+      "file_names": [
+        "variables.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 11,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [
+            "group"
+          ],
+          "issue_body_to_pr_title": [
+            "network",
+            "virtual"
+          ],
+          "issue_body_to_pr_body": [
+            "documentation",
+            "feature",
+            "group",
+            "report"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 177,
+      "title": "fix: reject empty virtual network address spaces",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/177",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nRejects empty virtual network address-space lists during Terraform input validation and disallows null values, producing an actionable error before the provider evaluates the resource.\n\n## Type of Change\n\n- [ ] Non-module change (e.g. CI/CD, documentation, etc.)\n-",
+      "file_names": [
+        "variables.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 8,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [
+            "network",
+            "virtual"
+          ],
+          "issue_body_to_pr_body": [
+            "documentation",
+            "feature",
+            "network",
+            "report",
+            "virtual"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 178,
+      "title": "docs: clarify optional resource lock configuration",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/178",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nClarifies that resource lock creation is optional, explains the null default, and adds a concise `CanNotDelete` configuration example to the generated module documentation.\n\n## Type of Change\n\n- [x] Non-module change (e.g. CI/CD, documentation, etc.)\n- [ ] Azure V",
+      "file_names": [
+        "README.md",
+        "_header.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 8,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [
+            "optional"
+          ],
+          "issue_body_to_pr_body": [
+            "adds",
+            "documentation",
+            "feature",
+            "generated",
+            "optional",
+            "report"
+          ],
+          "issue_identifiers_to_file_names": [
+            "readme"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 179,
+      "title": "feat: support virtual network flow timeout configuration",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/179",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nAdds an optional flow-timeout input with Azure range validation, maps it to the virtual network property only when configured, and demonstrates the capability in an example and generated documentation.\n\n## Type of Change\n\n- [ ] Non-module change (e.g. CI/CD, docum",
+      "file_names": [
+        "README.md",
+        "examples/example-c/README.md",
+        "examples/example-c/main.tf",
+        "main.tf",
+        "variables.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 10,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [
+            "network",
+            "virtual"
+          ],
+          "issue_body_to_pr_body": [
+            "adds",
+            "documentation",
+            "feature",
+            "generated",
+            "network",
+            "optional",
+            "report",
+            "virtual"
+          ],
+          "issue_identifiers_to_file_names": [
+            "readme"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 180,
+      "title": "fix: normalize exact duplicate address prefixes",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/180",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nNormalizes repeated, byte-identical address prefixes before sending the virtual network request. This prevents redundant entries in the common exact-duplicate case.\n\nThis change does not detect or reject semantically overlapping ranges such as a `/24` nested insid",
+      "file_names": [
+        "main.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 4,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "documentation",
+            "network",
+            "report",
+            "virtual"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 181,
+      "title": "fix: reject blank virtual network locations",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/181",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "## Description\n\nAdds Terraform input validation that rejects empty or whitespace-only Azure region values before the provider evaluates the virtual network resource.\n\nThe reported virtual network name behavior is unchanged; names with surrounding whitespace remain unresolved by t",
+      "file_names": [
+        "variables.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 8,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [
+            "network",
+            "virtual"
+          ],
+          "issue_body_to_pr_body": [
+            "adds",
+            "documentation",
+            "network",
+            "report",
+            "virtual"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 188,
+      "title": "chore(deps): bump the github-actions group across 1 directory with 7 updates",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/188",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Bumps the github-actions group with 7 updates in the / directory:\n\n| Package | From | To |\n| --- | --- | --- |\n| [actions/checkout](https://github.com/actions/checkout) | `6.0.3` | `7.0.1` |\n| [github/codeql-action/init](https://github.com/github/codeql-action) | `4.36.2` | `4.37",
+      "file_names": [
+        ".github/workflows/codeql.yml",
+        ".github/workflows/dependabot-precommit.yml",
+        ".github/workflows/issue-triage.lock.yml"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 11,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [
+            "group"
+          ],
+          "issue_title_to_pr_body": [
+            "group"
+          ],
+          "issue_body_to_pr_title": [
+            "group"
+          ],
+          "issue_body_to_pr_body": [
+            "group"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 207,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/207",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".gitignore"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 224,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/224",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 225,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/225",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 226,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/226",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 227,
+      "title": "Fix AVM lint interface failures",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/227",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "## Description\n\nFixes the AVM lint failures introduced by the current AzAPI interface requirements:\n\n- exposes and wires `resource_types`, `retry`, `timeouts`, and `ignore_body_changes` for every managed AzAPI resource;\n- migrates the lock and role assignment inputs to the curren",
+      "file_names": [
+        "README.md",
+        "main.tf",
+        "tests/unit/lock.tftest.hcl",
+        "tests/unit/role_assignments.tftest.hcl",
+        "variables.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 11,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [
+            "ignore"
+          ],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "documentation",
+            "generated",
+            "ignore",
+            "report"
+          ],
+          "issue_identifiers_to_file_names": [
+            "readme",
+            "test"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 228,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/228",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 229,
+      "title": "fix: require role assignment principal IDs to be GUIDs",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/229",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "## Description\n\n`role_assignments[*].principal_id` is currently passed straight through to `Microsoft.Authorization/roleAssignments` with no validation. A value that is not a GUID — an object display name, an email address, or a truncated ID — survives `terraform plan` and only f",
+      "file_names": [
+        "tests/unit/role_assignments.tftest.hcl",
+        "variables.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 3,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "adds"
+          ],
+          "issue_identifiers_to_file_names": [
+            "test"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 238,
+      "title": "refactor: use interfaces utility module",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/238",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "## Description\n\nUse `Azure/avm-utl-interfaces/azure` v0.7.0 to generate the lock and role-assignment payloads. The existing resource addresses, configurable AzAPI resource types, lock-note defaults, and role-assignment upgrade behavior are preserved.\n\nThe custom role-definition l",
+      "file_names": [
+        "README.md",
+        "main.tf",
+        "tests/unit/role_assignments.tftest.hcl"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 6,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "documentation",
+            "generated"
+          ],
+          "issue_identifiers_to_file_names": [
+            "readme",
+            "test"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 239,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/239",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".devcontainer/devcontainer.json",
+        ".github/agents/avm-tf.agent.md",
+        ".github/skills/avm-tf-azapi/SKILL.md",
+        ".github/skills/avm-tf-classifications/SKILL.md",
+        ".github/skills/avm-tf-codestyle/SKILL.md",
+        ".github/skills/avm-tf-documentation/SKILL.md",
+        ".github/skills/avm-tf-interfaces/SKILL.md",
+        ".github/skills/avm-tf-lifecycle/SKILL.md",
+        ".github/skills/avm-tf-migration/SKILL.md",
+        ".github/skills/avm-tf-process/SKILL.md",
+        ".github/skills/avm-tf-submodules/SKILL.md"
+      ],
+      "file_names_truncated": true,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 4,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [
+            "documentation",
+            "test"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 240,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/240",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 241,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/241",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/agents/avm-tf.agent.md",
+        ".github/skills/avm-tf-azapi/SKILL.md",
+        ".github/skills/avm-tf-azapi/references/tfpluginschema.md",
+        ".github/skills/avm-tf-classifications/SKILL.md",
+        ".github/skills/avm-tf-codestyle/SKILL.md",
+        ".github/skills/avm-tf-documentation/SKILL.md",
+        ".github/skills/avm-tf-interfaces/SKILL.md",
+        ".github/skills/avm-tf-lifecycle/SKILL.md",
+        ".github/skills/avm-tf-migration/SKILL.md",
+        ".github/skills/avm-tf-process/SKILL.md",
+        ".github/skills/avm-tf-submodules/SKILL.md"
+      ],
+      "file_names_truncated": true,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 4,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [
+            "documentation",
+            "test"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 242,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/242",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage-backfill.yml",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 243,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/243",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage-backfill.yml"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 244,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/244",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 247,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/247",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 251,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/251",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 252,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/252",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 253,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/253",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 254,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/254",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 255,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/255",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 256,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/256",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 257,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/257",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 258,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/258",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/workflows/issue-triage.lock.yml",
+        ".github/workflows/issue-triage.md"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 273,
+      "title": "ci: add a dispatchable issue-triage regression suite",
+      "sources": [
+        "open_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/273",
+      "state": "OPEN",
+      "draft": false,
+      "merged": false,
+      "body_excerpt": "Adds a dispatchable workflow that runs the issue-triage regression suite against this repository.\n\n## Why here and not in managed-files\n\nThe suite creates issues, drives them through triage, reads the results and retires them. Every one of those steps is in-repo, so `GITHUB_TOKEN",
+      "file_names": [
+        ".github/workflows/triage-regression.yml"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": true,
+      "merged_inventory": false,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [
+            "adds",
+            "test"
+          ],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 274,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/274",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        "examples/example-a/README.md",
+        "examples/example-a/main.tf",
+        "examples/example-b/README.md",
+        "examples/example-b/main.tf",
+        "examples/example-c/README.md",
+        "examples/example-c/main.tf",
+        "examples/ignore_example_for_e2e/README.md",
+        "examples/ignore_example_for_e2e/main.tf",
+        "main.telemetry.tf",
+        "main.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 12,
+        "plausible": true,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [
+            "ignore",
+            "ignore_example_for_e2e",
+            "readme"
+          ],
+          "issue_title_to_file_names": [
+            "ignore",
+            "ignore_example_for_e2e"
+          ]
+        }
+      }
+    },
+    {
+      "number": 275,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/275",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        ".avm/managed-files-version.json",
+        ".github/agents/avm-tf.agent.md",
+        ".github/copilot-instructions.md",
+        ".github/skills/avm-tf-azapi/SKILL.md",
+        ".github/skills/avm-tf-classifications/SKILL.md",
+        ".github/skills/avm-tf-codestyle/SKILL.md",
+        ".github/skills/avm-tf-conftest/SKILL.md",
+        ".github/skills/avm-tf-interfaces/SKILL.md",
+        ".github/skills/avm-tf-migration/SKILL.md",
+        ".github/skills/avm-tf-process/SKILL.md",
+        ".github/skills/avm-tf-submodules/SKILL.md",
+        ".github/skills/avm-tf-testing/SKILL.md"
+      ],
+      "file_names_truncated": true,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 0,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [],
+          "issue_title_to_file_names": []
+        }
+      }
+    },
+    {
+      "number": 285,
+      "title": "chore: run avm pre-commit [skip ci]",
+      "sources": [
+        "merged_pr_inventory"
+      ],
+      "url": "https://github.com/Azure/terraform-azurerm-avm-ptn-example-repo/pull/285",
+      "state": "MERGED",
+      "draft": false,
+      "merged": true,
+      "body_excerpt": "Automated `avm pre-commit` run from [azure-verified-modules-tools](https://github.com/Azure/azure-verified-modules-tools).\n\nThis PR is opened and merged by the AVM bot. `[skip ci]` is set on the commit so downstream workflows are not retriggered.\n",
+      "file_names": [
+        "README.md",
+        "terraform.tf"
+      ],
+      "file_names_truncated": false,
+      "open_inventory": false,
+      "merged_inventory": true,
+      "lexical_relevance": {
+        "version": 1,
+        "score": 2,
+        "plausible": false,
+        "signals": {
+          "issue_title_to_pr_title": [],
+          "issue_title_to_pr_body": [],
+          "issue_body_to_pr_title": [],
+          "issue_body_to_pr_body": [],
+          "issue_identifiers_to_file_names": [
+            "readme"
+          ],
+          "issue_title_to_file_names": []
+        }
+      }
+    }
+  ]
+}
