@@ -8,7 +8,9 @@ on:
     paths:
       - "terraform/root/.github/workflows/issue-triage.md"
       - "terraform/root/.github/workflows/issue-triage.lock.yml"
+      - "terraform/**/*.lock.yml"
       - "scripts/Test-IssueTriageReleaseStatus.ps1"
+      - "scripts/Test-GhAwActionPin.ps1"
       - ".github/workflows/validate-issue-triage-release-status.yml"
   workflow_dispatch:
 
@@ -28,3 +30,14 @@ jobs:
         run: |
           ./scripts/Test-IssueTriageReleaseStatus.ps1
           ./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
+
+  pins:
+    name: "[AVM] Validate gh-aw Action Pins"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check gh-aw-actions pins match the compiler
+        shell: pwsh
+        run: ./scripts/Test-GhAwActionPin.ps1
