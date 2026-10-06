@@ -24,5 +24,8 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # Version-locked to the gh aw compiler. Change it only by recompiling the lock with `gh aw compile`.
+      - dependency-name: "github/gh-aw-actions/*"
     cooldown:
       default-days: 7
