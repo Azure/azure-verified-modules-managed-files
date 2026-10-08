@@ -10,6 +10,8 @@ on:
       - "terraform/root/.github/workflows/issue-triage.lock.yml"
       - "terraform/canary-ring-0/.github/workflows/issue-triage.md"
       - "terraform/canary-ring-0/.github/workflows/issue-triage.lock.yml"
+      - "terraform/canary-ring-1/.github/workflows/issue-triage.md"
+      - "terraform/canary-ring-1/.github/workflows/issue-triage.lock.yml"
       - "scripts/Test-IssueTriageReleaseStatus.ps1"
       - ".github/workflows/validate-issue-triage-release-status.yml"
   workflow_dispatch:
@@ -31,13 +33,15 @@ jobs:
           ./scripts/Test-IssueTriageReleaseStatus.ps1
           ./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
 
-      - name: Exercise canary ring 0 canonical and compiled release proof
+      - name: Exercise canary ring canonical and compiled release proof
         shell: pwsh
         run: |
           # Canary overlays move between rings, so skip any file that is not present.
           foreach ($path in @(
               './terraform/canary-ring-0/.github/workflows/issue-triage.md',
-              './terraform/canary-ring-0/.github/workflows/issue-triage.lock.yml'
+              './terraform/canary-ring-0/.github/workflows/issue-triage.lock.yml',
+              './terraform/canary-ring-1/.github/workflows/issue-triage.md',
+              './terraform/canary-ring-1/.github/workflows/issue-triage.lock.yml'
           )) {
               if (Test-Path -LiteralPath $path) {
                   ./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath $path
