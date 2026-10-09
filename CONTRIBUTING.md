@@ -37,7 +37,10 @@ Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate its loc
 gh aw compile --dir terraform/root/.github/workflows
 ./scripts/Test-IssueTriageReleaseStatus.ps1
 ./scripts/Test-IssueTriageReleaseStatus.ps1 -WorkflowPath ./terraform/root/.github/workflows/issue-triage.lock.yml
+./scripts/Test-GhAwActionPin.ps1
 ```
+
+Never bump `github/gh-aw-actions/*` pins by hand or through Dependabot. They're version-locked to the compiler, and a newer setup action can drop scripts that the lock still calls. `Test-GhAwActionPin.ps1` fails when a pin doesn't match the lock's compiled `gh aw` version.
 
 The regression script requires PowerShell 7.4+, Bash, jq, and timeout. Ubuntu runners provide these tools; Windows can use Git Bash with jq on its PATH. Fixtures replace `gh` and execute the actual workflow shell without network access. They cover ancestry summaries beyond 250 commits, missing or misleading message references, merge results, release branches, pagination, API failures, evidence vetoes, and lookup budgets. The repository validation workflow runs both the canonical and compiled steps.
 
