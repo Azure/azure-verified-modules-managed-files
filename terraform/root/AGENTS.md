@@ -16,7 +16,6 @@ Use the [AVM Terraform agent](.github/agents/avm-tf.agent.md) for specification-
 - Permit AzureRM only for a specifically documented data-plane or non-ARM operation that AzAPI cannot perform. Independently justify each block and follow `avm-tf-azapi` and `avm-tf-tflint`.
 - Do not hand-edit generated `README.md` files. Edit `_header.md` and `_footer.md`, then use `avm docs` or `avm pre-commit`.
 - Use PowerShell 7.4 or later and `Avm.Authoring`; do not substitute retired Make, Porch, container, or repository-launcher workflows.
-- For implementation work, run the smallest relevant test tier, run `avm pre-commit`, commit the complete worktree, then run `avm pr-check`.
-- For read-only pattern reviews, use `avm-tf-pattern-review` and the read-only review guidance in `.github/copilot-instructions.md` instead of the implementation sequence.
+- Run the smallest relevant test tier, run `avm pre-commit`, commit the complete worktree, then run `avm pr-check`.
 
 The canonical file contains the complete module discovery, tooling, quality, and skill index guidance. Do not duplicate or independently extend those sections here.

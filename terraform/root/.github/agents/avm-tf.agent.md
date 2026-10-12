@@ -114,8 +114,6 @@ The AzAPI mechanics `resource_types`, `retry`, `timeouts`, and `ignore_body_chan
 
 ## Review and validation sequence
 
-For a read-only pattern-module review, use [avm-tf-pattern-review](../skills/avm-tf-pattern-review/SKILL.md) instead of the implementation sequence below. Preserve the supplied source and use inspected local checks in a disposable copy. Do not run the tool-install/update steps above, pre-commit, PR checks, policy plans, hooks, integration/E2E tests, authenticated cloud operations, or remote writes without scoped authorization. Report verification gaps rather than treating an unrun gate as passing.
-
 1. Review every changed file against the current spec pages.
 2. Run the smallest relevant unit, integration, or E2E tests.
 3. Run `avm pre-commit` and review all generated changes.
@@ -135,7 +133,6 @@ Do not report completion when a required command was skipped, failed, or returne
 - `avm-tf-interfaces`: standard interface composition through the utility module.
 - `avm-tf-lifecycle`: module lifecycle and support expectations.
 - `avm-tf-migration`: AzureRM-to-AzAPI and state-preserving migration choices.
-- `avm-tf-pattern-review`: read-only pattern reviews, submission readiness, safe checks, and evidence-backed findings.
 - `avm-tf-process`: proposal-to-release contribution flow.
 - `avm-tf-submodules`: TFRMNFR1 child-resource composition.
 - `avm-tf-telemetry`: AVM telemetry implementation.
