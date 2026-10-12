@@ -52,6 +52,12 @@ AzureRM is permitted only for a specifically documented data-plane or non-ARM op
 
 Do not hand-edit generated `README.md` files. Author module content in `_header.md` and `_footer.md`, then run `avm docs` or `avm pre-commit`. Read `avm-tf-documentation` before changing module documentation.
 
+### Read-only pattern reviews
+
+For a read-only pattern-module review or submission-readiness assessment, use [avm-tf-pattern-review](skills/avm-tf-pattern-review/SKILL.md). Keep the supplied source unchanged and run only inspected, local checks in a disposable copy.
+
+The tool-install/update, pre-commit, and commit/PR-gate sequences below apply to implementation work, not this review path. Do not run repository hooks, authenticated cloud operations, policy plans, integration/E2E tests, or remote writes without scoped authorization. Use temporary tooling instead of persistent upgrades, and report skipped or unavailable checks explicitly.
+
 ## Use the Managed Toolchain
 
 Use PowerShell 7.4 or later with `Avm.Authoring`:
@@ -107,6 +113,7 @@ When a task falls within a skill's domain, read and follow the full skill before
 | `avm-tf-interfaces` | Standard AVM interfaces and utility-module composition. | `.github/skills/avm-tf-interfaces/SKILL.md` |
 | `avm-tf-lifecycle` | Module proposal, ownership, lifecycle, versioning, and deprecation. | `.github/skills/avm-tf-lifecycle/SKILL.md` |
 | `avm-tf-migration` | AzureRM-to-AzAPI migration and state-preserving changes. | `.github/skills/avm-tf-migration/SKILL.md` |
+| `avm-tf-pattern-review` | Read-only pattern-module reviews, submission readiness, mocked test discovery, minimum-version compatibility, provider policy, and example/CI wiring. | `.github/skills/avm-tf-pattern-review/SKILL.md` |
 | `avm-tf-process` | Contribution flow from repository setup through validation, pull request, and release. | `.github/skills/avm-tf-process/SKILL.md` |
 | `avm-tf-submodules` | Child-resource submodule structure and composition. | `.github/skills/avm-tf-submodules/SKILL.md` |
 | `avm-tf-telemetry` | AVM telemetry resources, inputs, and AzAPI headers. | `.github/skills/avm-tf-telemetry/SKILL.md` |
