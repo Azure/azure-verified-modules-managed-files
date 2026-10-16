@@ -29,6 +29,12 @@ mapped to that file group, so a change here lands in many repositories at once.
 Repository-to-group mapping lives in
 [`azure-verified-modules-tools`](https://github.com/Azure/azure-verified-modules-tools).
 
+## Changing the PR check caller
+
+Run `./scripts/Test-PrCheckWorkflow.ps1` after changing `terraform/root/.github/workflows/pr-check.yml`.
+The contract snapshot preserves the triggers and unconditional call for fork, same-repository, and draft PRs.
+Environment approvals and integration/E2E fork restrictions belong in the reusable tools workflow, not this caller.
+
 ## Changing issue triage release detection
 
 Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate its lock with the `gh aw` version recorded in the lock header:
