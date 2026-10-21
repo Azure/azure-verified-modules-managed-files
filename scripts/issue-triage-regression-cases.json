@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "repository": "Azure/terraform-azurerm-avm-ptn-example-repo",
+  "fixtureMarker": "avm-triage-regression-fixture",
+  "anchors": {
+    "released": {
+      "pr": 227,
+      "released": true,
+      "subject": "AzAPI resource type and API version overrides"
+    },
+    "unreleased": {
+      "pr": 238,
+      "released": false,
+      "subject": "shared interfaces utility module refactor"
+    }
+  },
+  "cases": [
+    {
+      "id": "fix-released",
+      "phase": 1,
+      "anchor": "released",
+      "path": "Fix is confirmed and released, so the issue is closed as completed",
+      "title": "[AVM Module Issue]: Allow overriding the AzAPI resource type and API version",
+      "body": "### Description\n\nThe module pins the AzAPI API versions it uses internally. When a newer API version exposes a property we need, we have to wait for a module release rather than opting in ourselves.\n\n### Proposed\n\nExpose the `<provider>/<resource>@<api-version>` strings as an input so a caller can override them, keeping the current values as defaults:\n\n```hcl\nmodule \"example\" {\n  source = \"Azure/avm-ptn-example-repo/azurerm\"\n\n  resource_types = {\n    network_virtual_networks = \"Microsoft.Network/virtualNetworks@2025-05-01\"\n  }\n}\n```\n\n### Module version\n\n`v0.1.1`\n\n<!-- regr:fix-released -->\n\n\n<!-- avm-triage-regression-fixture -->",
+      "expectState": "closed",
+      "expectReason": "completed",
+      "expectOutput": "close_issue",
+      "expectAbsentLabel": "Awaiting Release To Be Cut",
+      "notes": "PR #227 is absent from unreleased_pr_numbers, so its fix is released. Merge and release timestamps mislead here: #227 merged 33 seconds before v0.1.2 was published, from that very commit."
+    },
+    {
+      "id": "fix-unreleased",
+      "phase": 1,
+      "anchor": "unreleased",
+      "path": "Fix is merged but unreleased, so the issue stays open and is labelled",
+      "title": "[AVM Module Issue]: Use the shared interfaces utility module instead of inline definitions",
+      "body": "### Description\n\nThe module hard-codes its role assignment and lock logic inline instead of consuming the shared AVM interfaces utility module. This means interface changes have to be re-implemented here by hand, and the module drifts from the AVM interface spec between releases.\n\n### Proposed\n\nConsume `Azure/avm-utl-interfaces/azurerm` for the role assignment and lock interfaces so the shapes stay aligned with the spec automatically.\n\n### Module version\n\n`v0.1.2`\n\n<!-- regr:fix-unreleased -->\n\n\n<!-- avm-triage-regression-fixture -->",
+      "expectState": "open",
+      "expectLabel": "Awaiting Release To Be Cut",
+      "expectAbsentOutput": "close_issue",
+      "notes": "PR #238 is present in unreleased_pr_numbers. Tied to a different PR than fix-released so neither case can mask the other."
+    },
+    {
+      "id": "question-type",
+      "phase": 1,
+      "path": "A usage question gets the Task issue type",
+      "title": "Question: does this module create the resource group or expect an existing one?",
+      "body": "### Question\n\nDoes this module create the resource group for me, or does it expect one to already exist?\n\nI have a resource group provisioned by a separate pipeline and I want the virtual network placed into it. I can see a `resource_group_name` input but it is not clear from the README whether supplying it means \"use this existing group\" or \"create a group with this name\".\n\nA one-line note in the README would settle it.\n\n<!-- avm-triage-regression-fixture -->",
+      "expectState": "open",
+      "expectType": "Task",
+      "expectOutput": "set_issue_type",
+      "expectAbsentOutput": "close_issue",
+      "notes": "Emitting Question instead of Task fails the run. Shipped in v1.0.25 and untested until this suite existed."
+    },
+    {
+      "id": "no-fix-open",
+      "phase": 1,
+      "path": "No fix exists, so the issue gets a type and labels and stays open",
+      "title": "Bug: diagnostic settings are left behind after terraform destroy",
+      "body": "### Describe the bug\n\nDiagnostic settings created by the module are not removed by `terraform destroy`. The virtual network and subnets are destroyed correctly, but the diagnostic setting stays attached to the (now deleted) resource and shows up as an orphan in the portal.\n\nRe-running `terraform apply` afterwards then fails because the diagnostic setting name is already taken.\n\n### Expected\n\n`terraform destroy` removes the diagnostic settings it created.\n\n<!-- avm-triage-regression-fixture -->",
+      "expectState": "open",
+      "expectType": "Bug",
+      "expectOutput": "set_issue_type",
+      "expectAbsentOutput": "close_issue",
+      "notes": "The everyday path. It must never regress into closing something."
+    },
+    {
+      "id": "needs-evidence",
+      "phase": 1,
+      "path": "A vague report gets a request for evidence and no other action",
+      "title": "Upgrade broke everything",
+      "body": "We upgraded from 0.1.1 to 0.1.2 and now everything is broken. Plans that used to work don't anymore.\n\nPlease fix it.\n\n<!-- avm-triage-regression-fixture -->",
+      "expectState": "open",
+      "expectOutput": "add_comment",
+      "expectAbsentOutput": "close_issue",
+      "notes": "Guards the opposite failure from fix-released: acting confidently on nothing."
+    },
+    {
+      "id": "reopen-override",
+      "phase": 2,
+      "reopenOf": "fix-released",
+      "path": "A human reopened a workflow closure, so the workflow never closes it again",
+      "expectState": "open",
+      "expectAbsentOutput": "close_issue",
+      "notes": "The override requires a closure by the workflow actor, so it cannot be staged with a bare API close. It chains off fix-released: that issue is closed by the workflow, then reopened here as a human."
+    }
+  ]
+}
