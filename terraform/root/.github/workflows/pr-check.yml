@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       authoringSource:
-        description: Authoring module source.
+        description: 'Where to obtain the Avm.Authoring PowerShell module.'
         required: false
         type: choice
         options:
@@ -15,7 +15,7 @@ on:
           - repo
         default: gallery
       authoringRef:
-        description: Gallery version or blank for latest; repo full commit SHA, branch, tag, or blank for the latest stable tag.
+        description: 'Avm.Authoring reference: authoringSource=gallery uses a package version (blank = latest); authoringSource=repo uses a tools SHA, tag or branch (blank = latest stable tag).'
         required: false
         type: string
         default: ''
