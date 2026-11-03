@@ -17,9 +17,9 @@ if ($jobs.Count -ne 1) {
 }
 
 $references = [regex]::Matches($jobs[0].Value, '(?m)^    uses:[ \t]*(\S+)[ \t]*\r?$')
-$expected = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@main'
-if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cne $expected) {
-    throw [System.InvalidOperationException]::new("The Terraform managed workflow must use $expected to match its configured identity subject.")
+$expected = '^Azure/azure-verified-modules-tools/\.github/workflows/terraform-module\.yml@[0-9a-f]{40}$'
+if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expected) {
+    throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
 }
 
 Write-Output 'Validated Terraform managed workflow ref.'
