@@ -29,6 +29,16 @@ mapped to that file group, so a change here lands in many repositories at once.
 Repository-to-group mapping lives in
 [`azure-verified-modules-tools`](https://github.com/Azure/azure-verified-modules-tools).
 
+## Workflow reference checks
+
+Run `./scripts/Test-WorkflowShaPins.ps1` and
+`./scripts/Test-WorkflowShaPins.Tests.ps1` with PowerShell 7.4+ and
+`powershell-yaml` 0.4.12. CI checks every file group's workflow YAML, including
+compiled locks, and this repository's own workflows. GitHub action and reusable
+workflow references require full commit SHAs; local references use the caller's
+commit, and Docker references require SHA256 digests. Branches, tags and
+expression-based references fail validation.
+
 ## Changing issue triage release detection
 
 Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate its lock with the `gh aw` version recorded in the lock header:

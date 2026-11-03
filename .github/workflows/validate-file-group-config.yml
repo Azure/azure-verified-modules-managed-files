@@ -8,6 +8,8 @@ on:
     paths:
       - "**/_config.json"
       - "terraform/**"
+      - "**/.github/workflows/**"
+      - "scripts/Test-WorkflowShaPins*.ps1"
       - "scripts/Test-FileGroupConfig.ps1"
       - "scripts/Test-TerraformWorkflowRef.ps1"
       - ".github/workflows/validate-file-group-config.yml"
@@ -28,3 +30,13 @@ jobs:
       - name: Validate Terraform workflow ref
         shell: pwsh
         run: ./scripts/Test-TerraformWorkflowRef.ps1
+
+      - name: Install YAML parser
+        shell: pwsh
+        run: Install-PSResource -Name powershell-yaml -Version 0.4.12 -Scope CurrentUser -TrustRepository
+
+      - name: Validate all workflow SHA pins
+        shell: pwsh
+        run: |
+          ./scripts/Test-WorkflowShaPins.Tests.ps1
+          ./scripts/Test-WorkflowShaPins.ps1
