@@ -9,6 +9,7 @@ on:
       - "**/_config.json"
       - "terraform/**"
       - "scripts/Test-FileGroupConfig.ps1"
+      - "scripts/Test-TerraformWorkflowRef.ps1"
       - ".github/workflows/validate-file-group-config.yml"
   workflow_dispatch:
 
@@ -23,3 +24,7 @@ jobs:
       - name: Validate file group config
         shell: pwsh
         run: ./scripts/Test-FileGroupConfig.ps1
+
+      - name: Validate Terraform workflow ref
+        shell: pwsh
+        run: ./scripts/Test-TerraformWorkflowRef.ps1
