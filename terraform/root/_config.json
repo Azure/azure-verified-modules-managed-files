@@ -31,7 +31,6 @@
     ".github/workflows/test-examples-template.yml",
     ".github/workflows/version-check.yml",
     ".vscode/mcp.json",
-    "LICENSE",
     "Makefile",
     "avm",
     "avm.bat",
