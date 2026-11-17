@@ -2,7 +2,7 @@
 name: PR Check
 on:
   pull_request:
-    types: ['opened', 'reopened', 'synchronize']
+    types: ['opened', 'reopened', 'synchronize', 'labeled', 'unlabeled']
   merge_group:
   workflow_dispatch:
     inputs:
@@ -22,6 +22,11 @@ on:
 
 jobs:
   run-managed-workflow:
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.action != 'labeled' && github.event.action != 'unlabeled') ||
+      github.event.label.name == 'PR: Run E2E Tests' ||
+      github.event.label.name == 'PR: Run Optional E2E Tests'
     uses: Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@31824f07a277458ce24e74ae69a33fdb18803bdf
     name: run managed workflow
     with:

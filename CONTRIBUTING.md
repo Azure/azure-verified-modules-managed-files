@@ -39,6 +39,10 @@ workflow references require full commit SHAs; local references use the caller's
 commit, and Docker references require SHA256 digests. Branches, tags and
 expression-based references fail validation.
 
+## Terraform pull-request test gates
+
+The Terraform PR workflow runs required E2E examples when `PR: Run E2E Tests` is applied. Each of `examples/default` and `examples/waf-aligned` is tested when present, and both must pass before merging. Apply `PR: Run Optional E2E Tests` to run optional examples; these do not gate merging. Adding or removing either label reruns the workflow, while unrelated label changes are ignored.
+
 ## Changing issue triage release detection
 
 Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate its lock with the `gh aw` version recorded in the lock header:
