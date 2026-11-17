@@ -47,10 +47,24 @@ if (-not $jobName.Success -or $jobName.Groups[1].Value.Trim("'").Trim('"') -cne 
         "The Terraform caller job must retain the 'run managed workflow' name and skip only unrelated label events.")
 }
 
+$permissionBlock = [regex]::Match(
+    $jobs[0].Value,
+    '(?ms)^    permissions:\r?\n(?<permissions>(?:      [^\r\n]*\r?\n)+)'
+)
+$permissions = @($permissionBlock.Groups['permissions'].Value -split '\r?\n' |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ })
+$expectedPermissions = @('contents: read', 'id-token: write', 'pull-requests: write')
+if (-not $permissionBlock.Success -or
+    [string]::Join(',', @($permissions | Sort-Object)) -cne [string]::Join(',', @($expectedPermissions | Sort-Object))) {
+    throw [System.InvalidOperationException]::new(
+        'The Terraform reusable workflow caller must grant only contents: read, id-token: write, and pull-requests: write.')
+}
+
 $references = [regex]::Matches($jobs[0].Value, '(?m)^    uses:[ \t]*(\S+)[ \t]*\r?$')
 $expected = '^Azure/azure-verified-modules-tools/\.github/workflows/terraform-module\.yml@[0-9a-f]{40}$'
 if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expected) {
     throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
 }
 
-Write-Output 'Validated Terraform managed workflow ref and PR event filter.'
+Write-Output 'Validated Terraform caller permissions, managed workflow ref, and PR event filter.'
