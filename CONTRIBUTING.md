@@ -41,7 +41,9 @@ expression-based references fail validation.
 
 ## Terraform pull-request test gates
 
-The Terraform PR workflow runs required E2E examples when `PR: Run E2E Tests` is applied. Each of `examples/default` and `examples/waf-aligned` is tested when present, and both must pass before merging. Apply `PR: Run Optional E2E Tests` to run optional examples; these do not gate merging. Adding or removing either label reruns the workflow, while unrelated label changes are ignored.
+`PR: Run E2E Tests` selects the required `examples/default` and `examples/waf-aligned` scenarios when present. `PR: Run Optional E2E Tests` selects those required scenarios plus the optional examples. Missing required scenarios are allowed, but every selected scenario must pass, including optional scenarios selected by the optional label.
+
+The reusable workflow reports one `Report check status` gate under the stable `run managed workflow` caller context. Adding or removing either E2E label reruns the workflow; unrelated label changes are ignored.
 
 Merge queues are not supported. Fork pull requests must use the same-repository release-branch handoff to run the gate.
 
