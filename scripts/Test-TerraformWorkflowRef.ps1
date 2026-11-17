@@ -23,9 +23,10 @@ if (-not $pullRequest.Success -or -not $types.Success -or
     throw [System.InvalidOperationException]::new(
         'The Terraform PR workflow must retain opened, reopened, and synchronize while admitting labeled and unlabeled events.')
 }
-if ($content -notmatch '(?m)^  merge_group:\s*$' -or
+if ($content -match '(?m)^  merge_group:\s*$' -or
     $content -notmatch '(?m)^  workflow_dispatch:\s*$') {
-    throw [System.InvalidOperationException]::new('The Terraform PR workflow must preserve merge_group and workflow_dispatch triggers.')
+    throw [System.InvalidOperationException]::new(
+        'The Terraform PR workflow must disable merge_group and preserve workflow_dispatch.')
 }
 
 $jobs = [regex]::Matches($content, '(?m)^  run-managed-workflow:\r?\n(?:(?!^  \S)[^\r\n]*(?:\r?\n|\z))*')

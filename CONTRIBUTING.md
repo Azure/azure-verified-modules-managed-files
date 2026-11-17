@@ -43,6 +43,8 @@ expression-based references fail validation.
 
 The Terraform PR workflow runs required E2E examples when `PR: Run E2E Tests` is applied. Each of `examples/default` and `examples/waf-aligned` is tested when present, and both must pass before merging. Apply `PR: Run Optional E2E Tests` to run optional examples; these do not gate merging. Adding or removing either label reruns the workflow, while unrelated label changes are ignored.
 
+Merge queues are not supported. Fork pull requests must use the same-repository release-branch handoff to run the gate.
+
 ## Changing issue triage release detection
 
 Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate its lock with the `gh aw` version recorded in the lock header:
