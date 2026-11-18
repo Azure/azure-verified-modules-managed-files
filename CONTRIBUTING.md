@@ -39,6 +39,16 @@ workflow references require full commit SHAs; local references use the caller's
 commit, and Docker references require SHA256 digests. Branches, tags and
 expression-based references fail validation.
 
+## Terraform pull-request test gates
+
+These labels let you open a pull request early and get feedback without immediately provisioning cloud E2E test resources. Add a label when the change and examples are ready for E2E validation, avoiding unnecessary cloud cost and wait time during early development.
+
+`PR: Run Required E2E Tests` selects the required `examples/default` and `examples/waf-aligned` scenarios when present. `PR: Run All E2E Tests` selects those required scenarios plus the optional examples. Missing required scenarios are allowed, but every selected scenario must pass, including optional scenarios selected by the all-tests label.
+
+The reusable workflow reports one `Report check status` gate under the stable `run managed workflow` caller context. Adding or removing either E2E label reruns the workflow; unrelated label changes are ignored.
+
+Merge queues are not supported. Fork pull requests must use the same-repository release-branch handoff to run the gate.
+
 ## Changing issue triage release detection
 
 Edit `terraform/root/.github/workflows/issue-triage.md`, then regenerate its lock with the `gh aw` version recorded in the lock header:
