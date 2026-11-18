@@ -41,7 +41,9 @@ expression-based references fail validation.
 
 ## Terraform pull-request test gates
 
-`PR: Run E2E Tests` selects the required `examples/default` and `examples/waf-aligned` scenarios when present. `PR: Run Optional E2E Tests` selects those required scenarios plus the optional examples. Missing required scenarios are allowed, but every selected scenario must pass, including optional scenarios selected by the optional label.
+These labels let you open a pull request early and get feedback without immediately provisioning cloud E2E test resources. Add a label when the change and examples are ready for E2E validation, avoiding unnecessary cloud cost and wait time during early development.
+
+`PR: Run Required E2E Tests` selects the required `examples/default` and `examples/waf-aligned` scenarios when present. `PR: Run All E2E Tests` selects those required scenarios plus the optional examples. Missing required scenarios are allowed, but every selected scenario must pass, including optional scenarios selected by the all-tests label.
 
 The reusable workflow reports one `Report check status` gate under the stable `run managed workflow` caller context. Adding or removing either E2E label reruns the workflow; unrelated label changes are ignored.
 

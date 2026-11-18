@@ -40,7 +40,7 @@ $jobCondition = [regex]::Match(
     '(?ms)^    if:[ \t]*>-\r?\n(?<condition>(?:      [^\r\n]*\r?\n)+)(?=    \S|\z)'
 )
 $normalizedCondition = ($jobCondition.Groups['condition'].Value -replace '\s+', ' ').Trim()
-$expectedCondition = "github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled') || github.event.label.name == 'PR: Run E2E Tests' || github.event.label.name == 'PR: Run Optional E2E Tests'"
+$expectedCondition = "github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled') || github.event.label.name == 'PR: Run Required E2E Tests' || github.event.label.name == 'PR: Run All E2E Tests'"
 if (-not $jobName.Success -or $jobName.Groups[1].Value.Trim("'").Trim('"') -cne 'run managed workflow' -or
     -not $jobCondition.Success -or $normalizedCondition -cne $expectedCondition) {
     throw [System.InvalidOperationException]::new(
