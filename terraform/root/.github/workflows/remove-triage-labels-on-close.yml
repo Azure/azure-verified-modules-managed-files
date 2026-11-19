@@ -1,0 +1,56 @@
+---
+name: Remove Triage Labels on Close
+
+# pull_request_target gives fork pull requests a write token. This workflow never checks out or runs pull request code, so that token stays safe.
+on:
+  issues:
+    types:
+      - closed
+  pull_request_target:
+    types:
+      - closed
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  remove-labels:
+    name: Remove triage labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove triage labels
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          cat > stale <<'LABELS'
+          Needs: Triage :mag:
+          Needs: Immediate Attention :bangbang:
+          Status: Response Overdue :triangular_flag_on_post:
+          LABELS
+
+          # Only remove labels the item carries, so a missing label never fails the run with a 404.
+          jq -r '(.issue // .pull_request).labels[].name' "$GITHUB_EVENT_PATH" \
+            | grep -xFf stale > present || true
+
+          if [ ! -s present ]; then
+            echo "#${NUMBER} has no triage labels."
+            exit 0
+          fi
+
+          while IFS= read -r label; do
+            encoded="$(jq -rn --arg label "$label" '$label | @uri')"
+            echo "Removing '${label}' from #${NUMBER}"
+            # Another actor may remove the label first. Only fail if it's still there.
+            if ! gh api --silent -X DELETE "repos/${GH_REPO}/issues/${NUMBER}/labels/${encoded}"; then
+              if gh api "repos/${GH_REPO}/issues/${NUMBER}/labels" --jq '.[].name' | grep -qxF "$label"; then
+                echo "::error::Failed to remove '${label}' from #${NUMBER}"
+                exit 1
+              fi
+            fi
+          done < present
