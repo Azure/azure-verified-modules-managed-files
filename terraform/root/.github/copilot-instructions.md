@@ -78,6 +78,7 @@ avm version
 | `avm test e2e` | Deploy, idempotency-check, and destroy runnable examples. |
 | `avm lint` | Run the managed TFLint configuration. |
 | `avm check policy` | Evaluate example plans against APRL and AVMSEC through Conftest. |
+| `avm release-branch` | Hand off a reviewed external fork PR for credentialed E2E testing. |
 
 To update from MAR, repeat `Install-PSResource` with `-Reinstall`, then start a new PowerShell session and import the module. The built-in `avm update` still uses PowerShell Gallery. Do not substitute the retired Make, Porch, container, or repository-launcher workflows.
 
@@ -87,7 +88,7 @@ Open PRs early; add deployment labels when the changes and examples are ready to
 
 Existing required examples must run and pass before merging; missing required examples are not yet a merge failure. In an optional-only repository, the Required label selects no deployments; use the All label for optional examples. A warning comment or skipped job is not evidence that E2E tests passed. Follow the [testing skill's CI guidance](skills/avm-tf-testing/SKILL.md#ci-expectations) for merge gates and absent examples.
 
-Fork PR labels do not grant deployment credentials. Coordinate a maintainer-authorized same-repository release-branch handoff rather than weakening permissions or environment controls.
+Fork PR labels do not grant deployment credentials. For credentialed E2E testing, an authorized Microsoft FTE must review the current fork changes and use `avm release-branch` for the same-repository handoff. Follow the [process skill's fork handoff guidance](skills/avm-tf-process/SKILL.md#fork-pr-release-branch-handoff); do not weaken permissions or environment controls.
 
 ## Module Discovery
 

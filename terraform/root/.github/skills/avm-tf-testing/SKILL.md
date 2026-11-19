@@ -153,7 +153,7 @@ Static PR checks, unit tests, and integration tests are not label-gated. The `Re
 
 Missing required examples produce guidance but are not yet a merge failure. If only optional examples exist, the Required label selects no deployments; use the All label. If no runnable examples exist, neither label can create tests. Inspect the discovery summary, sticky PR feedback, and actual test results; label selection, a successful static check, or a skipped job does not prove deployment validation passed. Report absent suites explicitly rather than claiming they passed.
 
-Labels on fork PRs never authorize privileged deployments. Coordinate a maintainer-authorized same-repository release-branch handoff; do not expose credentials or weaken workflow permissions to run fork code.
+Labels on fork PRs never authorize privileged deployments. Follow the [process skill's reviewed fork handoff](../avm-tf-process/SKILL.md#fork-pr-release-branch-handoff) using `avm release-branch` before credentialed E2E testing, then apply the appropriate label to the same-repository follow-up PR. Do not expose credentials or weaken workflow permissions to run fork code.
 
 ## Debugging
 
