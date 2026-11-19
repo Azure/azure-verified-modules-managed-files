@@ -45,7 +45,7 @@ These labels let you open a pull request early and get feedback without immediat
 
 `PR: Run Required E2E Tests` selects the required `examples/default` and `examples/waf-aligned` scenarios when present. `PR: Run All E2E Tests` selects those required scenarios plus the optional examples. Missing required scenarios are allowed, but every selected scenario must pass, including optional scenarios selected by the all-tests label.
 
-The reusable workflow reports one `Report check status` gate under the stable `run managed workflow` caller context. Adding or removing either E2E label reruns the workflow; unrelated label changes are ignored.
+The reusable workflow reports one `Report check status` gate under the stable `run managed workflow` caller context. Any label change reruns the caller with the PR's current labels, so unrelated labels cannot replace the required check with a skipped run. The reusable workflow selects E2E scenarios from the E2E labels.
 
 Merge queues are not supported. Fork pull requests must use the same-repository release-branch handoff to run the gate.
 

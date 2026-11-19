@@ -21,7 +21,7 @@ $expectedEventTypes = @('opened', 'reopened', 'synchronize', 'labeled', 'unlabel
 if (-not $pullRequest.Success -or -not $types.Success -or
     [string]::Join(',', @($eventTypes | Sort-Object)) -cne [string]::Join(',', @($expectedEventTypes | Sort-Object))) {
     throw [System.InvalidOperationException]::new(
-        'The Terraform PR workflow must retain opened, reopened, and synchronize while admitting labeled and unlabeled events.')
+        'The Terraform PR workflow must run for opened, reopened, synchronize, labeled, and unlabeled events.')
 }
 if ($content -match '(?m)^  merge_group:\s*$' -or
     $content -notmatch '(?m)^  workflow_dispatch:\s*$') {
@@ -35,16 +35,10 @@ if ($jobs.Count -ne 1) {
 }
 
 $jobName = [regex]::Match($jobs[0].Value, '(?m)^    name:[ \t]*([^\r\n]+)$')
-$jobCondition = [regex]::Match(
-    $jobs[0].Value,
-    '(?ms)^    if:[ \t]*>-\r?\n(?<condition>(?:      [^\r\n]*\r?\n)+)(?=    \S|\z)'
-)
-$normalizedCondition = ($jobCondition.Groups['condition'].Value -replace '\s+', ' ').Trim()
-$expectedCondition = "github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled') || github.event.label.name == 'PR: Run Required E2E Tests' || github.event.label.name == 'PR: Run All E2E Tests'"
 if (-not $jobName.Success -or $jobName.Groups[1].Value.Trim("'").Trim('"') -cne 'run managed workflow' -or
-    -not $jobCondition.Success -or $normalizedCondition -cne $expectedCondition) {
+    $jobs[0].Value -match '(?m)^    if:[ \t]*') {
     throw [System.InvalidOperationException]::new(
-        "The Terraform caller job must retain the 'run managed workflow' name and skip only unrelated label events.")
+        "The Terraform caller job must retain the 'run managed workflow' name and run for every admitted event.")
 }
 
 $permissionBlock = [regex]::Match(
@@ -67,4 +61,4 @@ if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expec
     throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
 }
 
-Write-Output 'Validated Terraform caller permissions, managed workflow ref, and PR event filter.'
+Write-Output 'Validated Terraform caller permissions, managed workflow ref, and unconditional PR event handling.'
