@@ -126,7 +126,15 @@ Review the final diff rather than only the hand-authored files. Managed and gene
 
 Open PRs early, then add `PR: Run Required E2E Tests` when required examples are ready for deployment validation, or `PR: Run All E2E Tests` to include optional examples. This avoids unnecessary cloud cost and runtime during early development. Static PR checks, unit tests, and integration tests run without these labels.
 
-Follow the [testing skill's label and merge-gate guidance](../avm-tf-testing/SKILL.md#pr-deployment-labels-and-merge-gates). Existing required examples must run and pass; absent required examples are not yet mandatory. The Required label selects no deployments in an optional-only repository. Confirm selected jobs actually passed rather than treating label presence or skipped tests as success. Fork labels do not grant deployment credentials; use the handoff below when credentialed E2E tests are needed.
+Follow the [testing skill's label and merge-gate guidance](../avm-tf-testing/SKILL.md#pr-deployment-labels-and-merge-gates). The pending public-spec addition [TFNFR42](https://github.com/Azure/Azure-Verified-Modules/pull/3155) requires resource modules to provide executable `examples/defaults/` and `examples/waf-aligned/`; pattern and utility modules require only `examples/defaults/`. WAF-aligned is optional for pattern and utility modules. The exact canonical spelling is `defaults`; `default` remains only migration compatibility.
+
+Existing required examples must run and pass; absent required examples are not yet mandatory. A Terraform composition warning for missing or misplaced canonical examples is advisory before v1 and cannot block merge or release. Do not use `.e2eignore` to satisfy coverage or copy placeholders to clear warnings. Backfill by renaming a suitable existing example; route a missing or ambiguous canonical scenario to the module owner instead of rewriting deployments or fabricating copies.
+
+Required examples cover required and applicable conditional inputs and use module defaults for unrelated optional inputs. Keep location, telemetry, test harness setup, deployment scope, and dependency resources separate from module feature overrides. Terraform submodules need no separate example trees; parent examples must exercise relevant submodule behavior.
+
+A name such as `waf-aligned` does not prove semantic WAF compliance. Use applicable [SFR2](https://github.com/Azure/Azure-Verified-Modules/pull/3155) recommendations to assess the scenario.
+
+Class-aware Required-label selection and the warning-only Terraform composition check are pending Tools/Avm.Authoring behavior, not published functionality. The current shared workflow still discovers existing runnable `default`/`defaults` and `waf-aligned` examples. Confirm selected jobs actually passed rather than treating label presence or skipped tests as success. Fork labels do not grant deployment credentials; use the handoff below when credentialed E2E tests are needed.
 
 ### Fork PR release-branch handoff
 
