@@ -25,7 +25,6 @@
     ".github/policies/avmrequiredfiles.yml",
     ".github/policies/branch-protection.yml",
     ".github/policies/branchprotection.yml",
-    ".github/policies/scheduledSearches.yml",
     ".github/workflows/e2e.yml",
     ".github/workflows/grept_cronjob.yml",
     ".github/workflows/linting.yml",
