@@ -75,7 +75,7 @@ Test configurations, fixtures, and setup or teardown Terraform use AzAPI for eve
 
 AzureRM may be configured or exercised only when required by permitted `azurerm_*` resource or data-source blocks. Each block must independently implement one specific unsupported data-plane/non-ARM operation, document the exact block and why no applicable AzAPI resource or action can implement it, link the upstream AzAPI issue or pull request, and be replaced when support ships. One valid block does not authorize another.
 
-Authenticate without committed secrets. Local runs can use an authenticated Azure CLI session or supported `ARM_*` environment variables. CI uses OIDC with least-privilege identities and protected environments.
+Authenticate without committed secrets. Local runs can use an authenticated Azure CLI session or supported `ARM_*` environment variables. CI uses OIDC with least-privilege test identities; integration tests do not require an E2E label.
 
 ## E2E examples
 
@@ -139,6 +139,21 @@ The worktree must be clean. PR check runs sync, format, transform, lint, policy,
 - Keep test environments least privilege and isolate subscriptions where practical.
 - Treat `skipped` as different from `pass`. If the change requires a test tier, an undiscovered or skipped tier is not evidence.
 - Preserve logs for failed Terraform run blocks, plans, policy findings, and cleanup failures.
+
+### PR deployment labels and merge gates
+
+The managed workflow authorizes E2E deployments through labels rather than environment reviewer approvals. Open PRs early and add a deployment label when the changes and examples are ready, avoiding unnecessary cloud cost and runtime.
+
+| Label | Selected E2E examples |
+| --- | --- |
+| `PR: Run Required E2E Tests` | Existing runnable `examples/default` or `examples/defaults`, plus `examples/waf-aligned`. |
+| `PR: Run All E2E Tests` | Required examples and every other runnable optional example. |
+
+Static PR checks, unit tests, and integration tests are not label-gated. The `Report check status` merge gate requires applicable checks and all selected E2E tests to succeed, including optional examples selected by the All label. Existing required examples need either E2E label and must pass before merging; do not use `.e2eignore` to bypass them.
+
+Missing required examples produce guidance but are not yet a merge failure. If only optional examples exist, the Required label selects no deployments; use the All label. If no runnable examples exist, neither label can create tests. Inspect the discovery summary, sticky PR feedback, and actual test results; label selection, a successful static check, or a skipped job does not prove deployment validation passed. Report absent suites explicitly rather than claiming they passed.
+
+Labels on fork PRs never authorize privileged deployments. Coordinate a maintainer-authorized same-repository release-branch handoff; do not expose credentials or weaken workflow permissions to run fork code.
 
 ## Debugging
 

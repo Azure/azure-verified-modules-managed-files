@@ -81,6 +81,14 @@ avm version
 
 To update from MAR, repeat `Install-PSResource` with `-Reinstall`, then start a new PowerShell session and import the module. The built-in `avm update` still uses PowerShell Gallery. Do not substitute the retired Make, Porch, container, or repository-launcher workflows.
 
+## Pull request deployment labels
+
+Open PRs early; add deployment labels when the changes and examples are ready to avoid unnecessary cloud cost and runtime. `PR: Run Required E2E Tests` selects existing runnable `default`/`defaults` and `waf-aligned` examples. `PR: Run All E2E Tests` selects required and optional examples. Static PR checks, unit tests, and integration tests do not require these labels.
+
+Existing required examples must run and pass before merging; missing required examples are not yet a merge failure. In an optional-only repository, the Required label selects no deployments; use the All label for optional examples. A warning comment or skipped job is not evidence that E2E tests passed. Follow the [testing skill's CI guidance](skills/avm-tf-testing/SKILL.md#ci-expectations) for merge gates and absent examples.
+
+Fork PR labels do not grant deployment credentials. Coordinate a maintainer-authorized same-repository release-branch handoff rather than weakening permissions or environment controls.
+
 ## Module Discovery
 
 Use the current AVM indexes to confirm module availability, classification, naming, and ownership:

@@ -124,6 +124,10 @@ The pull request must explain:
 
 Review the final diff rather than only the hand-authored files. Managed and generated outputs are part of the change.
 
+Open PRs early, then add `PR: Run Required E2E Tests` when required examples are ready for deployment validation, or `PR: Run All E2E Tests` to include optional examples. This avoids unnecessary cloud cost and runtime during early development. Static PR checks, unit tests, and integration tests run without these labels.
+
+Follow the [testing skill's label and merge-gate guidance](../avm-tf-testing/SKILL.md#pr-deployment-labels-and-merge-gates). Existing required examples must run and pass; absent required examples are not yet mandatory. The Required label selects no deployments in an optional-only repository. Confirm selected jobs actually passed rather than treating label presence or skipped tests as success. For forks, coordinate a maintainer-authorized same-repository release-branch handoff; labels do not grant deployment credentials.
+
 ## 9. Release
 
 Follow the current AVM semantic-versioning and publishing process. Confirm:
