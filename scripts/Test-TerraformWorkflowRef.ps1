@@ -35,10 +35,33 @@ if ($jobs.Count -ne 1) {
 }
 
 $jobName = [regex]::Match($jobs[0].Value, '(?m)^    name:[ \t]*([^\r\n]+)$')
-if (-not $jobName.Success -or $jobName.Groups[1].Value.Trim("'").Trim('"') -cne 'run managed workflow' -or
-    $jobs[0].Value -match '(?m)^    if:[ \t]*') {
+if (-not $jobName.Success -or $jobName.Groups[1].Value.Trim("'").Trim('"') -cne 'run managed workflow') {
     throw [System.InvalidOperationException]::new(
-        "The Terraform caller job must retain the 'run managed workflow' name and run for every admitted event.")
+        "The Terraform caller job must retain the 'run managed workflow' name.")
+}
+
+$condition = [regex]::Match(
+    $jobs[0].Value,
+    '(?ms)^    if: >-\r?\n(?<condition>(?:      [^\r\n]*(?:\r?\n|\z))+)'
+)
+$conditionLines = @($condition.Groups['condition'].Value -split '\r?\n' |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ })
+$expectedCondition = @(
+    "(github.event_name == 'workflow_dispatch') ||",
+    "(github.event_name != 'pull_request') ||",
+    '!(',
+    "(github.event.pull_request.user.login == 'azure-verified-modules[bot]') &&",
+    "startsWith(github.head_ref, 'avm-bot/pre-commit-') &&",
+    '(github.event.pull_request.base.repo.full_name == github.repository) &&',
+    '(github.event.pull_request.head.repo.full_name == github.repository)',
+    ')'
+)
+if (-not $condition.Success -or
+    [string]::Join(' ', $conditionLines) -cne [string]::Join(' ', $expectedCondition) -or
+    $jobs[0].Value -match '(?m)github\.actor') {
+    throw [System.InvalidOperationException]::new(
+        'The Terraform caller must run workflow_dispatch and normal/fork PRs, but skip same-repository PRs created by the Azure Verified Modules app from avm-bot/pre-commit- branches; github.actor must not be used.')
 }
 
 $permissionBlock = [regex]::Match(
@@ -61,4 +84,4 @@ if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expec
     throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
 }
 
-Write-Output 'Validated Terraform caller permissions, managed workflow ref, and unconditional PR event handling.'
+Write-Output 'Validated Terraform caller permissions, managed workflow ref, and repo-sync PR guard.'
