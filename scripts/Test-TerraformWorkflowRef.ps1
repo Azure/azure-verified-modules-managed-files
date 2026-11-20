@@ -50,10 +50,12 @@ $conditionLines = @($condition.Groups['condition'].Value -split '\r?\n' |
 $expectedCondition = @(
     "(github.event_name == 'workflow_dispatch') ||",
     "(github.event_name != 'pull_request') ||",
-    '(github.event.pull_request.base.repo.full_name != github.repository) ||',
-    '(github.event.pull_request.head.repo.full_name != github.repository) ||',
-    "(github.event.pull_request.user.login != 'azure-verified-modules[bot]') ||",
-    "(!startsWith(github.event.pull_request.head.ref, 'avm-bot/pre-commit-'))"
+    '!(',
+    "(github.event.pull_request.user.login == 'azure-verified-modules[bot]') &&",
+    "startsWith(github.head_ref, 'avm-bot/pre-commit-') &&",
+    '(github.event.pull_request.base.repo.full_name == github.repository) &&',
+    '(github.event.pull_request.head.repo.full_name == github.repository)',
+    ')'
 )
 if (-not $condition.Success -or
     [string]::Join(' ', $conditionLines) -cne [string]::Join(' ', $expectedCondition) -or
