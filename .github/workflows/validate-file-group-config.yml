@@ -10,6 +10,7 @@ on:
       - "terraform/**"
       - "**/.github/workflows/**"
       - "scripts/Test-WorkflowShaPins*.ps1"
+      - "scripts/Test-DependabotPreCommitWorkflow.ps1"
       - "scripts/Test-FileGroupConfig.ps1"
       - "scripts/Test-TerraformWorkflowRef.ps1"
       - ".github/workflows/validate-file-group-config.yml"
@@ -40,3 +41,7 @@ jobs:
         run: |
           ./scripts/Test-WorkflowShaPins.Tests.ps1
           ./scripts/Test-WorkflowShaPins.ps1
+
+      - name: Validate Dependabot pre-commit workflow
+        shell: pwsh
+        run: ./scripts/Test-DependabotPreCommitWorkflow.ps1
