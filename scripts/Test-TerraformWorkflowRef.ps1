@@ -86,7 +86,7 @@ $expected = '^Azure/azure-verified-modules-tools/\.github/workflows/terraform-mo
 if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expected) {
     throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
 }
-$expectedReference = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@9e0c446411aa8b9ed3392045c67065f6a0119117'
+$expectedReference = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@6216cf3d7f8c0374effc3a9dc587d23e99d87e16'
 if ($references[0].Groups[1].Value -cne $expectedReference) {
     throw [System.InvalidOperationException]::new(
         "The Terraform managed workflow must use the coordinated Tools revision '$expectedReference'.")
