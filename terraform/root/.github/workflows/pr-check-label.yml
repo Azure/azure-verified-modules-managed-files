@@ -1,8 +1,9 @@
 name: PR Check Label Rerun
 
 on:
-  pull_request_target:
-    types: ['labeled', 'unlabeled']
+  workflow_run:
+    workflows: ['PR Check Label Observer']
+    types: ['completed']
 
 permissions:
   actions: write
@@ -12,6 +13,7 @@ permissions:
 
 jobs:
   rerun-pr-check:
-    uses: Azure/azure-verified-modules-tools/.github/workflows/pr-check-label-rerun.yml@15820572314e1710ca528928573d6e49b8d929c5
+    uses: Azure/azure-verified-modules-tools/.github/workflows/pr-check-label-rerun.yml@5be28c8db7f04f75a7fb6a195ed89678885cc280
     with:
-      tools-ref: '15820572314e1710ca528928573d6e49b8d929c5'
+      tools-ref: '5be28c8db7f04f75a7fb6a195ed89678885cc280'
+      observer-workflow-path: '.github/workflows/pr-check-label-observer.yml'

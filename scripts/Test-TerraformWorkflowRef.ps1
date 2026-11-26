@@ -7,6 +7,9 @@ param(
     ),
     [string] $LabelWorkflowPath = [System.IO.Path]::Combine(
         $PSScriptRoot, '..', 'terraform', 'root', '.github', 'workflows', 'pr-check-label.yml'
+    ),
+    [string] $ObserverWorkflowPath = [System.IO.Path]::Combine(
+        $PSScriptRoot, '..', 'terraform', 'root', '.github', 'workflows', 'pr-check-label-observer.yml'
     )
 )
 
@@ -86,26 +89,48 @@ $expected = '^Azure/azure-verified-modules-tools/\.github/workflows/terraform-mo
 if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expected) {
     throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
 }
-$expectedReference = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@15820572314e1710ca528928573d6e49b8d929c5'
+$expectedReference = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@5be28c8db7f04f75a7fb6a195ed89678885cc280'
 if ($references[0].Groups[1].Value -cne $expectedReference) {
     throw [System.InvalidOperationException]::new(
         "The Terraform managed workflow must use the coordinated Tools revision '$expectedReference'.")
 }
 
+$observerContent = Get-Content -LiteralPath $ObserverWorkflowPath -Raw
+$observerTrigger = [regex]::Match(
+    $observerContent,
+    '(?ms)^  pull_request:\r?\n    types:[ \t]*\[(?<types>[^\]]+)\][ \t]*\r?$'
+)
+$observerEventTypes = @(
+    $observerTrigger.Groups['types'].Value -split ',' |
+        ForEach-Object { $_.Trim().Trim("'").Trim('"') }
+)
+$expectedLabelEventTypes = @('labeled', 'unlabeled')
+if ($observerContent -notmatch '(?m)^name: PR Check Label Observer\r?$' -or
+    -not $observerTrigger.Success -or
+    [string]::Join(',', @($observerEventTypes | Sort-Object)) -cne [string]::Join(',', @($expectedLabelEventTypes | Sort-Object)) -or
+    $observerContent -notmatch '(?m)^permissions: \{\}\r?$') {
+    throw [System.InvalidOperationException]::new(
+        'The Terraform label observer must use only pull_request labeled/unlabeled events, retain its unique name, and grant no permissions.')
+}
+
 $labelContent = Get-Content -LiteralPath $LabelWorkflowPath -Raw
 $labelTrigger = [regex]::Match(
     $labelContent,
-    '(?ms)^  pull_request_target:\r?\n    types:[ \t]*\[(?<types>[^\]]+)\][ \t]*\r?$'
+    '(?ms)^  workflow_run:\r?\n    workflows:[ \t]*\[(?<workflows>[^\]]+)\][ \t]*\r?\n    types:[ \t]*\[(?<types>[^\]]+)\][ \t]*\r?$'
+)
+$labelWorkflows = @(
+    $labelTrigger.Groups['workflows'].Value -split ',' |
+        ForEach-Object { $_.Trim().Trim("'").Trim('"') }
 )
 $labelEventTypes = @(
     $labelTrigger.Groups['types'].Value -split ',' |
         ForEach-Object { $_.Trim().Trim("'").Trim('"') }
 )
-$expectedLabelEventTypes = @('labeled', 'unlabeled')
 if (-not $labelTrigger.Success -or
-    [string]::Join(',', @($labelEventTypes | Sort-Object)) -cne [string]::Join(',', @($expectedLabelEventTypes | Sort-Object))) {
+    [string]::Join(',', $labelWorkflows) -cne 'PR Check Label Observer' -or
+    [string]::Join(',', $labelEventTypes) -cne 'completed') {
     throw [System.InvalidOperationException]::new(
-        'The Terraform label workflow must use pull_request_target only for labeled and unlabeled events.')
+        'The Terraform label rerun must use workflow_run only for completed PR Check Label Observer runs.')
 }
 
 $labelPermissions = [regex]::Match(
@@ -131,17 +156,27 @@ if (-not $labelPermissions.Success -or
 
 $labelJobsBlock = [regex]::Match($labelContent, '(?ms)^jobs:\r?\n(?<jobs>(?:  [^\r\n]*(?:\r?\n|\z))+)$')
 $labelJobs = [regex]::Matches($labelJobsBlock.Groups['jobs'].Value, '(?m)^  [a-zA-Z0-9_-]+:\r?$')
-if (-not $labelJobsBlock.Success -or $labelJobs.Count -ne 1) {
+$observerJobsBlock = [regex]::Match($observerContent, '(?ms)^jobs:\r?\n(?<jobs>(?:  [^\r\n]*(?:\r?\n|\z))+)$')
+$observerJobs = [regex]::Matches($observerJobsBlock.Groups['jobs'].Value, '(?m)^  [a-zA-Z0-9_-]+:\r?$')
+if (-not $labelJobsBlock.Success -or $labelJobs.Count -ne 1 -or
+    -not $observerJobsBlock.Success -or $observerJobs.Count -ne 1) {
     throw [System.InvalidOperationException]::new(
-        'The Terraform label workflow must contain exactly one reusable-workflow job.')
+        'Each Terraform label wrapper must contain exactly one reusable-workflow job.')
 }
 
 $labelUses = [regex]::Matches($labelContent, '(?m)^    uses:[ \t]*(\S+)[ \t]*\r?$')
+$observerUses = [regex]::Matches($observerContent, '(?m)^    uses:[ \t]*(\S+)[ \t]*\r?$')
 $expectedLabelReference = 'Azure/azure-verified-modules-tools/.github/workflows/pr-check-label-rerun.yml@' +
+    $expectedReference.Substring($expectedReference.LastIndexOf('@') + 1)
+$expectedObserverReference = 'Azure/azure-verified-modules-tools/.github/workflows/pr-check-label-observer.yml@' +
     $expectedReference.Substring($expectedReference.LastIndexOf('@') + 1)
 if ($labelUses.Count -ne 1 -or $labelUses[0].Groups[1].Value -cne $expectedLabelReference) {
     throw [System.InvalidOperationException]::new(
         "The Terraform label job must use the coordinated Tools reusable workflow '$expectedLabelReference'.")
+}
+if ($observerUses.Count -ne 1 -or $observerUses[0].Groups[1].Value -cne $expectedObserverReference) {
+    throw [System.InvalidOperationException]::new(
+        "The Terraform observer job must use the coordinated Tools reusable workflow '$expectedObserverReference'.")
 }
 
 $toolsRef = [regex]::Match(
@@ -154,11 +189,20 @@ if (-not $toolsRef.Success -or
         'The Terraform label workflow tools-ref input must match the pinned reusable workflow SHA.')
 }
 
-if ($labelContent -match '(?m)^\s+(if|runs-on|timeout-minutes|steps|concurrency|secrets|env):' -or
-    $labelContent -notmatch 'pull_request_target:' -or
-    $labelContent -match '(?m)^\s*(workflow_dispatch:|repository_dispatch:)') {
+$observerPath = [regex]::Match(
+    $labelContent,
+    "(?m)^      observer-workflow-path:[ \t]*['`"]?\.github/workflows/pr-check-label-observer\.yml['`"]?[ \t]*\r?$"
+)
+if (-not $observerPath.Success) {
     throw [System.InvalidOperationException]::new(
-        'The Terraform label workflow must delegate rerun behavior to Tools without local filtering, orchestration, secrets, or alternate dispatch.')
+        'The Terraform rerun caller must identify the exact observer workflow path.')
 }
 
-Write-Output 'Validated Terraform caller events, shared label rerun wiring, permissions, managed workflow refs, and repo-sync PR guard.'
+if (($labelContent + $observerContent) -match '(?m)^\s+(if|runs-on|timeout-minutes|steps|concurrency|secrets|env):' -or
+    ($labelContent + $observerContent) -match 'pull_request_target:' -or
+    ($labelContent + $observerContent) -match '(?m)^\s*(workflow_dispatch:|repository_dispatch:)') {
+    throw [System.InvalidOperationException]::new(
+        'The Terraform label wrappers must delegate rerun behavior to Tools without local filtering, orchestration, secrets, or alternate dispatch.')
+}
+
+Write-Output 'Validated Terraform PR Check, two-stage label caller wiring, permissions, managed workflow refs, and repo-sync PR guard.'
