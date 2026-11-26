@@ -74,17 +74,22 @@ $permissionBlock = [regex]::Match(
 $permissions = @($permissionBlock.Groups['permissions'].Value -split '\r?\n' |
     ForEach-Object { $_.Trim() } |
     Where-Object { $_ })
-$expectedPermissions = @('contents: read', 'id-token: write', 'pull-requests: write')
+$expectedPermissions = @('contents: read', 'id-token: write', 'issues: read', 'pull-requests: write')
 if (-not $permissionBlock.Success -or
     [string]::Join(',', @($permissions | Sort-Object)) -cne [string]::Join(',', @($expectedPermissions | Sort-Object))) {
     throw [System.InvalidOperationException]::new(
-        'The Terraform reusable workflow caller must grant only contents: read, id-token: write, and pull-requests: write.')
+        'The Terraform reusable workflow caller must grant contents: read, id-token: write, issues: read, and pull-requests: write.')
 }
 
 $references = [regex]::Matches($jobs[0].Value, '(?m)^    uses:[ \t]*(\S+)[ \t]*\r?$')
 $expected = '^Azure/azure-verified-modules-tools/\.github/workflows/terraform-module\.yml@[0-9a-f]{40}$'
 if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expected) {
     throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
+}
+$expectedReference = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@9e0c446411aa8b9ed3392045c67065f6a0119117'
+if ($references[0].Groups[1].Value -cne $expectedReference) {
+    throw [System.InvalidOperationException]::new(
+        "The Terraform managed workflow must use the coordinated Tools revision '$expectedReference'.")
 }
 
 $labelContent = Get-Content -LiteralPath $LabelWorkflowPath -Raw
