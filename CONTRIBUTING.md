@@ -49,7 +49,7 @@ The reusable workflow currently discovers existing runnable `default`/`defaults`
 
 Do not use `.e2eignore` to satisfy required coverage or copy placeholders to clear warnings. Backfill by renaming a suitable existing example; route gaps or ambiguous WAF intent to the module owner.
 
-The reusable workflow reports one `Report check status` gate under the stable `run managed workflow` caller context. Any label change reruns the caller with the PR's current labels, so unrelated labels cannot replace the required check with a skipped run. The reusable workflow selects E2E scenarios from the E2E labels.
+The reusable workflow reports one `Report check status` gate under the stable `run managed workflow` caller context. A read-only observer handles same-repository E2E label additions and removals, then the default-branch handler reruns the existing `pull_request` caller at the PR's current head. Unrelated labels cannot replace the required check with a skipped run, and the reusable workflow reads the PR's live labels when selecting E2E scenarios.
 
 Merge queues are not supported. Fork pull requests must use the same-repository release-branch handoff to run the gate.
 
