@@ -86,7 +86,7 @@ $expected = '^Azure/azure-verified-modules-tools/\.github/workflows/terraform-mo
 if ($references.Count -ne 1 -or $references[0].Groups[1].Value -cnotmatch $expected) {
     throw [System.InvalidOperationException]::new('The Terraform managed workflow must use the Tools terraform-module.yml workflow pinned to a full 40-character commit SHA; mutable references are not permitted.')
 }
-$expectedReference = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@6216cf3d7f8c0374effc3a9dc587d23e99d87e16'
+$expectedReference = 'Azure/azure-verified-modules-tools/.github/workflows/terraform-module.yml@15820572314e1710ca528928573d6e49b8d929c5'
 if ($references[0].Groups[1].Value -cne $expectedReference) {
     throw [System.InvalidOperationException]::new(
         "The Terraform managed workflow must use the coordinated Tools revision '$expectedReference'.")
@@ -117,47 +117,48 @@ $permissionLines = @(
         ForEach-Object { $_.Trim() } |
         Where-Object { $_ }
 )
-$expectedLabelPermissions = @('actions: write', 'pull-requests: read')
+$expectedLabelPermissions = @(
+    'actions: write',
+    'contents: read',
+    'issues: read',
+    'pull-requests: read'
+)
 if (-not $labelPermissions.Success -or
     [string]::Join(',', @($permissionLines | Sort-Object)) -cne [string]::Join(',', @($expectedLabelPermissions | Sort-Object))) {
     throw [System.InvalidOperationException]::new(
-        'The Terraform label workflow must grant only actions: write and pull-requests: read.')
+        'The Terraform label workflow must grant exactly the reusable rerun workflow permissions: actions: write, contents: read, issues: read, and pull-requests: read.')
 }
 
-foreach ($label in @('PR: Run Required E2E Tests', 'PR: Run All E2E Tests')) {
-    if ($labelContent -notmatch [regex]::Escape("github.event.label.name == '$label'")) {
-        throw [System.InvalidOperationException]::new(
-            "The Terraform label workflow must filter the '$label' label.")
-    }
+$labelJobsBlock = [regex]::Match($labelContent, '(?ms)^jobs:\r?\n(?<jobs>(?:  [^\r\n]*(?:\r?\n|\z))+)$')
+$labelJobs = [regex]::Matches($labelJobsBlock.Groups['jobs'].Value, '(?m)^  [a-zA-Z0-9_-]+:\r?$')
+if (-not $labelJobsBlock.Success -or $labelJobs.Count -ne 1) {
+    throw [System.InvalidOperationException]::new(
+        'The Terraform label workflow must contain exactly one reusable-workflow job.')
 }
 
-$requiredLabelWorkflowFragments = @(
-    'pulls/$env:PULL_REQUEST',
-    '$pullRequest.head.repo.full_name -cne $env:REPOSITORY',
-    'use a same-repository release-branch handoff',
-    '.head.sha',
-    "^[0-9a-f]{40}$",
-    'actions/workflows/pr-check.yml/runs?event=pull_request&head_sha=$headSha',
-    '$_.pull_requests',
-    '$_.number -eq $pullRequestNumber',
-    'No pull_request PR Check run was found',
-    "if (`$run[0].status -cne 'completed')",
-    'Start-Sleep -Seconds 15',
-    '$latestPullRequest.head.sha -cne $headSha',
-    'actions/runs/$($run[0].id)/rerun'
+$labelUses = [regex]::Matches($labelContent, '(?m)^    uses:[ \t]*(\S+)[ \t]*\r?$')
+$expectedLabelReference = 'Azure/azure-verified-modules-tools/.github/workflows/pr-check-label-rerun.yml@' +
+    $expectedReference.Substring($expectedReference.LastIndexOf('@') + 1)
+if ($labelUses.Count -ne 1 -or $labelUses[0].Groups[1].Value -cne $expectedLabelReference) {
+    throw [System.InvalidOperationException]::new(
+        "The Terraform label job must use the coordinated Tools reusable workflow '$expectedLabelReference'.")
+}
+
+$toolsRef = [regex]::Match(
+    $labelContent,
+    '(?m)^      tools-ref:[ \t]*[''"]?(?<ref>[0-9a-f]{40})[''"]?[ \t]*\r?$'
 )
-foreach ($fragment in $requiredLabelWorkflowFragments) {
-    if (-not $labelContent.Contains($fragment)) {
-        throw [System.InvalidOperationException]::new(
-            "The Terraform label workflow is missing required rerun behavior: '$fragment'.")
-    }
+if (-not $toolsRef.Success -or
+    $toolsRef.Groups['ref'].Value -cne $labelUses[0].Groups[1].Value.Substring($labelUses[0].Groups[1].Value.LastIndexOf('@') + 1)) {
+    throw [System.InvalidOperationException]::new(
+        'The Terraform label workflow tools-ref input must match the pinned reusable workflow SHA.')
 }
 
-if ($labelContent -match '(?m)^\s*(uses:|secrets:|actions/checkout@)' -or
+if ($labelContent -match '(?m)^\s+(if|runs-on|timeout-minutes|steps|concurrency|secrets|env):' -or
     $labelContent -notmatch 'pull_request_target:' -or
     $labelContent -match '(?m)^\s*(workflow_dispatch:|repository_dispatch:)') {
     throw [System.InvalidOperationException]::new(
-        'The Terraform label workflow must not execute PR code, consume secrets, or expose an alternate dispatch path.')
+        'The Terraform label workflow must delegate rerun behavior to Tools without local filtering, orchestration, secrets, or alternate dispatch.')
 }
 
-Write-Output 'Validated Terraform caller events, label rerun safety, permissions, managed workflow ref, and repo-sync PR guard.'
+Write-Output 'Validated Terraform caller events, shared label rerun wiring, permissions, managed workflow refs, and repo-sync PR guard.'
