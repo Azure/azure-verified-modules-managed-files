@@ -12,6 +12,7 @@ on:
       - "scripts/Test-WorkflowShaPins*.ps1"
       - "scripts/Test-DependabotPreCommitWorkflow.ps1"
       - "scripts/Test-FileGroupConfig.ps1"
+      - "scripts/Test-TerraformLabelAutomation.ps1"
       - "scripts/Test-TerraformWorkflowRef.ps1"
       - ".github/workflows/validate-file-group-config.yml"
   workflow_dispatch:
@@ -45,3 +46,7 @@ jobs:
       - name: Validate Dependabot pre-commit workflow
         shell: pwsh
         run: ./scripts/Test-DependabotPreCommitWorkflow.ps1
+
+      - name: Validate Terraform label automation
+        shell: pwsh
+        run: ./scripts/Test-TerraformLabelAutomation.ps1
