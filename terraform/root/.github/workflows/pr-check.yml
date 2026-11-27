@@ -37,6 +37,7 @@ jobs:
       authoringRef: ${{ inputs.authoringRef || '' }}
     secrets: inherit
     permissions:
+      checks: write
       id-token: write
       contents: read
       issues: read
