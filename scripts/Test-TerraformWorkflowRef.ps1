@@ -77,11 +77,11 @@ $permissionBlock = [regex]::Match(
 $permissions = @($permissionBlock.Groups['permissions'].Value -split '\r?\n' |
     ForEach-Object { $_.Trim() } |
     Where-Object { $_ })
-$expectedPermissions = @('checks: write', 'contents: read', 'id-token: write', 'issues: read', 'pull-requests: write')
+$expectedPermissions = @('contents: read', 'id-token: write', 'issues: read', 'pull-requests: write')
 if (-not $permissionBlock.Success -or
     [string]::Join(',', @($permissions | Sort-Object)) -cne [string]::Join(',', @($expectedPermissions | Sort-Object))) {
     throw [System.InvalidOperationException]::new(
-        'The Terraform reusable workflow caller must grant checks: write, contents: read, id-token: write, issues: read, and pull-requests: write.')
+        'The Terraform reusable workflow caller must grant contents: read, id-token: write, issues: read, and pull-requests: write.')
 }
 
 $references = [regex]::Matches($jobs[0].Value, '(?m)^    uses:[ \t]*(\S+)[ \t]*\r?$')
